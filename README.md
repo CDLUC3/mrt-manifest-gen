@@ -2,6 +2,8 @@
 
 This microservice is part of the [Merritt Preservation System](https://github.com/CDLUC3/mrt-doc). 
 
+## Purpose
+
 Facilitate the generation of Merritt manifests using a cloud bucket or an inventory list.
 
 ## Use Cases
