@@ -1,0 +1,9 @@
+services:
+  merritt-ops:
+    container_name: mrt-manifest-gen
+    image: ${ECR_REGISTRY}/mrt-manifest-gen
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9292:9292"
