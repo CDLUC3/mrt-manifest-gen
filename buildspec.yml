@@ -1,0 +1,53 @@
+version: 0.2
+
+# Pre-requisites
+# - Create CodeBuild project
+#   - Provide minimal github credentials to access public repo
+
+phases:
+  pre_build:
+    on-failure: ABORT
+    commands:
+    - PRDBUCK=$(aws ssm get-parameter --name /uc3/mrt/config-bucket-prd --query Parameter.Value --output text)
+    - COMMIT=`git rev-parse --short HEAD`
+    - # Get semantic tags for commit otherwise get all tags for commit, sort and choose the last value
+    - TAG=`(git tag --contains $COMMIT | egrep "^[0-9]+\.[0-9]+\.[0-9]+$" || git tag --contains $COMMIT || echo '') | sort | tail -1`
+    - |
+      if [[ "$MODE" == "OnPush" ]]
+      then
+        # Get Tag || Get Branch || Alternate Branch Lookup || Get Committ
+        BRANCHTAG=`echo $TAG | grep . || git symbolic-ref -q --short HEAD || git name-rev $(git rev-parse --short HEAD) | cut -d' ' -f2 || git rev-parse --short HEAD`
+      else
+        BRANCHTAG=$BRANCHNAME
+      fi
+    - echo "Branchtag ${BRANCHTAG}; COMMITDATE=${COMMITDATE}; REPONAME=${REPONAME}; BRANCHNAME=${BRANCHNAME}"
+
+    - export CODEARTIFACT_AUTH_TOKEN=`aws codeartifact get-authorization-token --domain cdlib-uc3-mrt --domain-owner $AWS_ACCOUNT_ID --region $AWS_REGION --query authorizationToken --output text`
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+
+  build:
+    on-failure: ABORT
+    commands:
+    - |
+      docker compose build --push --quiet
+
+      aws lambda update-function-code \
+        --function-name mrt-SinatraLambda-ucsfglantz \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+        --no-cli-pager
+
+      aws lambda update-function-code \
+        --function-name mrt-SinatraLambda-merrittpm \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+        --no-cli-pager
+
+      aws lambda update-function-code \
+        --function-name mrt-SinatraLambda-ucilib \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+        --no-cli-pager
+
+      aws lambda update-function-code \
+        --function-name mrt-SinatraLambda-testdata \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+        --no-cli-pager

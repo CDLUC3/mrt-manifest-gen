@@ -10,8 +10,19 @@ services:
       AWS_REGION: ${AWS_REGION:-us-west-2}
       # Allowed values: s3api, httpsapi, inventoryfile, inventoryurl
       MANIFEST_MODE: ${MANIFEST_MODE:-s3api}
+      # In s3api mode, this is the name of the bucket
+      # In httpsapi mode, this is the base URL to reach the bucket
       MANIFEST_BUCKET: ${MANIFEST_BUCKET:-not_applicable}
+      # This will trigger only a subset of paths to be loaded
       MANIFEST_PREFIX: ${MANIFEST_PREFIX:-}
+      # MANIFEST_URL is the URL prefix to assign to manifest enties.
+      # MANIFEST_URL: 
+      # INVENTORY_FILE is the location where the inventory will be cached.
+      # INVENTORY_FILE: ${INVENTORY_FILE:-/app/inventory-file.csv}
+      # INVENTORY_BUCKET/INVENTORY_KEY will store a cached version of the inventory when running as a lambda.
+      #   A unique key should be used for each workspace.
+      # INVENTORY_BUCKET:
+      # INVENTORY_KEY:
     volumes:
       - ~/.aws:/root/.aws:ro
       - ./inventory-file.csv:/app/inventory-file.csv:rw
