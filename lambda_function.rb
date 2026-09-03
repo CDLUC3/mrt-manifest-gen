@@ -15,6 +15,8 @@ require 'base64'
 # $app ||= Rack::Builder.parse_file("#{__dir__}/app/config.ru").first
 $app ||= Rack::Builder.parse_file("#{__dir__}/#{ENV.fetch('RACK_CONFIG', 'app/config_mrt.ru')}")
 
+puts $app.inspect
+
 ENV['RACK_ENV'] ||= 'production'
 
 module LambdaFunctions
