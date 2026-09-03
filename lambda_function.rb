@@ -22,6 +22,7 @@ module LambdaFunctions
   class Handler
     def self.process(event:, context:)
       # context is nil when running locally
+      puts "TB 111"
       context.nil?
 
       # unless context.nil?
