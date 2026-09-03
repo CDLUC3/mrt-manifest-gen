@@ -70,7 +70,7 @@ class Inventory
 end
 
 class InventoryConfig
-  INVENTORY_FILE = '/app/inventory-file.csv'
+  INVENTORY_FILE = '/tmp/inventory-file.csv'
 
   def initialize(path: '')
     @path = path

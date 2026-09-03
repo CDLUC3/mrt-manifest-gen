@@ -25,7 +25,7 @@ services:
       # INVENTORY_KEY:
     volumes:
       - ~/.aws:/root/.aws:ro
-      - ./inventory-file.csv:/app/inventory-file.csv:rw
+      - ./inventory-file.csv:/tmp/inventory-file.csv:rw
     ports:
       - "9292:9292"
     entrypoint:
