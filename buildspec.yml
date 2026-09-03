@@ -34,16 +34,20 @@ phases:
 
       # aws lambda update-function-code \
       #   --function-name mrt-SinatraLambda-ucsfglantz \
-      #  --no-cli-pager
+      #   --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+      #   --no-cli-pager
 
       aws lambda update-function-code \
         --function-name mrt-SinatraLambda-merrittpm \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
         --no-cli-pager
 
       # aws lambda update-function-code \
-      #   --function-name mrt-SinatraLambda-ucilib \
-      #   --no-cli-pager
+      #  --function-name mrt-SinatraLambda-ucilib \
+      #  --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+      #  --no-cli-pager
 
       # aws lambda update-function-code \
-      #   --function-name mrt-SinatraLambda-testdata \
-      #   --no-cli-pager
+      #  --function-name mrt-SinatraLambda-testdata \
+      #  --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+      #  --no-cli-pager
