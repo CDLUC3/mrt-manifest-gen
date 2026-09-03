@@ -59,6 +59,7 @@ module LambdaFunctions
         'rack.input' => StringIO.new(body),
         'rack.errors' => $stderr
       }
+      puts env.inspect
 
       # Pass request headers to Rack if they are available
       headers.each_pair do |key, value|
@@ -74,7 +75,11 @@ module LambdaFunctions
         env[header] = value.to_s
       end
 
+      puts headers.inspect
+
       response = { message: 'About to invoke lambda. This object should be replaced by response.' }
+
+      puts response.inspect
       begin
         # Response from Rack must have status, headers and body
         status, headers, body = $app.call env
