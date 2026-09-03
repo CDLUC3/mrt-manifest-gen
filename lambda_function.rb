@@ -13,7 +13,10 @@ require 'base64'
 # Global object that responds to the call method. Stay outside of the handler
 # to take advantage of container reuse
 # $app ||= Rack::Builder.parse_file("#{__dir__}/app/config.ru").first
+
+puts "TB 112"
 $app ||= Rack::Builder.parse_file("#{__dir__}/#{ENV.fetch('RACK_CONFIG', 'app/config_mrt.ru')}")
+puts "TB 113"
 
 ENV['RACK_ENV'] ||= 'production'
 
