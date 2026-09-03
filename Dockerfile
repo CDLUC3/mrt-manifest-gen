@@ -24,4 +24,7 @@ COPY . /var/task
 COPY .bundle/config /var/task/.bundle/config
 RUN bundle install
 
-ENTRYPOINT ["bundle", "exec", "puma", "app/config_mrt.ru"]
+# This structure assumes the following:
+#   lambda_function.rb contains a module name LambdaFunctions which contains a class Handler
+# That class conforms to the method signature expected for a Lambda.
+CMD [ "lambda_function.LambdaFunctions::Handler.process" ]
