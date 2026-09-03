@@ -14,9 +14,7 @@ require 'base64'
 # to take advantage of container reuse
 # $app ||= Rack::Builder.parse_file("#{__dir__}/app/config.ru").first
 
-puts "TB 112"
 $app ||= Rack::Builder.parse_file("#{__dir__}/#{ENV.fetch('RACK_CONFIG', 'app/config_mrt.ru')}")
-puts "TB 113"
 
 ENV['RACK_ENV'] ||= 'production'
 
@@ -25,7 +23,6 @@ module LambdaFunctions
   class Handler
     def self.process(event:, context:)
       # context is nil when running locally
-      puts "TB 111"
       context.nil?
 
       # unless context.nil?

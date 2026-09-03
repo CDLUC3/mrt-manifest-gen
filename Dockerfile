@@ -23,6 +23,7 @@ RUN bundle install
 COPY . /var/task
 COPY .bundle/config /var/task/.bundle/config
 RUN bundle install
+RUN mkdir -p /app
 
 # This structure assumes the following:
 #   lambda_function.rb contains a module name LambdaFunctions which contains a class Handler
