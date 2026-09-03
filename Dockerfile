@@ -4,10 +4,11 @@
 #*********************************************************************
 # See https://itnext.io/docker-rails-puma-nginx-postgres-999cd8866b18
 
-FROM public.ecr.aws/docker/library/ruby:3.4
+FROM public.ecr.aws/lambda/ruby:3.4
 ARG BUILD_TAG
-RUN apt-get update -y -qq && \
-  apt-get -y upgrade
+
+RUN dnf -y update && dnf -y upgrade
+RUN dnf -y install gcc make git
 
 ENV RACK_CONFIG=app/config_mrt.ru
 ENV TZ=America/Los_Angeles

@@ -15,8 +15,6 @@ require 'base64'
 # $app ||= Rack::Builder.parse_file("#{__dir__}/app/config.ru").first
 $app ||= Rack::Builder.parse_file("#{__dir__}/#{ENV.fetch('RACK_CONFIG', 'app/config_mrt.ru')}")
 
-Sinatra::Application.logger.info($app.inspect)
-
 ENV['RACK_ENV'] ||= 'production'
 
 module LambdaFunctions
@@ -61,7 +59,6 @@ module LambdaFunctions
         'rack.input' => StringIO.new(body),
         'rack.errors' => $stderr
       }
-      Sinatra::Application.logger.info("env.inspect: #{env.inspect}")
 
       # Pass request headers to Rack if they are available
       headers.each_pair do |key, value|
@@ -77,11 +74,8 @@ module LambdaFunctions
         env[header] = value.to_s
       end
 
-      Sinatra::Application.logger.info("headers.inspect: #{headers.inspect}")
-
       response = { message: 'About to invoke lambda. This object should be replaced by response.' }
 
-      Sinatra::Application.logger.info("response.inspect: #{response.inspect}")
       begin
         # Response from Rack must have status, headers and body
         status, headers, body = $app.call env
