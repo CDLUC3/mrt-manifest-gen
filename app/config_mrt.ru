@@ -13,4 +13,6 @@ Sinatra::Application.set :server_settings, :timeout => 300
 
 Sinatra::Application.set :host_authorization => { permitted_hosts: [] }
 
+puts "TB 11111"
+
 run Sinatra::Application
