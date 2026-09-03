@@ -5,5 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      AWS_PROFILE: ${AWS_PROFILE:-default}
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      # Allowed values: s3api, httpsapi, inventoryfile, inventoryurl
+      MANIFEST_MODE: ${MANIFEST_MODE:-s3api}
+      MANIFEST_BUCKET: ${MANIFEST_BUCKET:-not_applicable}
+      MANIFEST_PREFIX: ${MANIFEST_PREFIX:-}
+    volumes:
+      - ~/.aws:/root/.aws:ro
+      - ./inventory-file.csv:/app/inventory-file.csv:rw
     ports:
       - "9292:9292"

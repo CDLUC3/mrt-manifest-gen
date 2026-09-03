@@ -3,6 +3,7 @@
 source 'http://rubygems.org'
 # ruby '~> 3.4'
 
+gem 'aws-sdk-s3'
 gem 'bigdecimal'
 gem 'csv'
 gem 'debug'

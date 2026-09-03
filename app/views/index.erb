@@ -1,5 +1,71 @@
 <html>
+<head>
+  <title>Manifest Generator</title>
+  <style>
+    table { border-collapse: collapse; width: 70%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .data { text-align: right; }
+    dt { font-weight: bold; }
+    dd { margin: 0 0 10px 20px; }
+  </style>
+</head>
 <body>
 <h1>Manifest Generator</h1>
+<h2>Source: <%= iconfig.source %></h2>
+<dl>
+  <dt>Prefix</dt>
+  <dd><%= iconfig.prefix %></dd>
+  <dt>Path</dt>
+  <dd><%= iconfig.path %></dd>
+  <dt>Mode</dt>
+  <dd><%= iconfig.mode %></dd>
+  <dt>Last Updated</dt>
+  <dd><%= iconfig.last_updated %></dd>
+</dl>
+<h3>Stats</h3>
+<ul>
+  <li>Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
+  <li>Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
+</ul>
+<h3>Prefixes</h3>
+<ul>
+  <li><a href="<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></li>
+  <% iconfig.inventory.prefixes.each do |prefix| %>
+    <li><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></li>
+  <% end %>
+</ul>
+
+<h3>Files</h3>
+<table>
+  <tr>
+    <th>Key</th>
+    <th>Size</th>
+    <th>Last Modified</th>
+  </tr>
+  <% iconfig.inventory.files.each do |file| %>
+  <tr>
+    <td><%= file[:key] %></td>
+    <td class="data"><%= Inventory.format_int(file[:size]) %></td>
+    <td><%= file[:last_modified] %></td>
+  </tr>
+  <% end %>
+</table>
+
+<h3>Summary Stats</h3>
+<table>
+  <tr>
+    <th>Extension</th>
+    <th>Count</th>
+    <th>Bytes</th>
+  </tr>
+  <% iconfig.inventory.count_by_extension.each do |ext, count| %>
+  <tr>
+    <td><%= ext %></td>
+    <td class="data"><%= Inventory.format_int(count) %></td>
+    <td class="data"><%= Inventory.format_int(iconfig.inventory.bytes_by_extension[ext]) %></td>
+  </tr>
+  <% end %>
+</table>
 </body>
 </html>

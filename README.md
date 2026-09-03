@@ -45,3 +45,42 @@ Facilitate the generation of Merritt manifests using a cloud bucket or an invent
   - The Manifest Generation application will only have access to an inventory file.
   - The Manifest Generation application will generate URLs to a DAMS or other service
     - These urls need to grant the Merritt ingest service access to the DAMS data.
+
+## Design
+
+### Inputs
+
+#### Required Inputs
+
+One of the following
+- S3 compatible bucket name
+- S3 https URL (with list permissions)
+- Inventory file
+- Inventory URL
+
+#### Configuration inputs (ENV or yaml TBD)
+- prefix_path - if not processing the entire inventory
+- retrieval_url - url prefix to insert into file urls in a manifest
+- manifest_url - url prefix to insert into manifest url
+
+#### Optional Inputs
+- AWS credential mount
+  - corresponding profile name passed in via ENV
+- Metadata File
+
+### Application States
+- Inventory not loaded
+- Inventory loaded
+- Inventory refreshed
+
+### Data to display
+- view totals
+  - file counts, bytes
+  - file counts, bytes by extension
+- manifest of manifest stats
+  - number of manifests
+  - average object count
+  - average object size
+  - average files per object
+- navigate to subfolders
+
