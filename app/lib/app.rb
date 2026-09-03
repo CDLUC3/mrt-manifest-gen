@@ -81,7 +81,10 @@ class InventoryConfig
 
     @inventory = Inventory.new
     if File.exist?(INVENTORY_FILE)
-      @inventory.load_from_csv(INVENTORY_FILE, path: path)
+      begin
+        @inventory.load_from_csv(INVENTORY_FILE, path: path)
+      rescue
+      end
     end
 
     case @mode
@@ -140,6 +143,7 @@ class InventoryConfig
 
   def reload_needed
     return true if last_updated.nil?
+    return true if @inventory.count == 0
 
     last_updated < (Time.now - 180) # Reload if older than 3 minutes
   end
