@@ -30,6 +30,7 @@ phases:
     on-failure: ABORT
     commands:
     - |
+      BRANCHTAG=latest
       docker compose build --push --quiet
 
       # aws lambda update-function-code \
