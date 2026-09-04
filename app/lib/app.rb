@@ -43,7 +43,7 @@ class InventoryConfig
       @inventory.load_from_csv(INVENTORY_FILE, path: path)
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
-      https_reload(@source) if reload_needed
+      https_reload("#{@source}/?list-type=2") if reload_needed
     end
   end
 
