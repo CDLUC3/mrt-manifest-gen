@@ -4,7 +4,7 @@ require 'sinatra'
 require 'sinatra/base'
 require 'sinatra/contrib'
 
-require_relative 'lib/app.rb'
+require_relative 'lib/app'
 
 set :bind, '0.0.0.0'
 
@@ -14,4 +14,3 @@ get '/*' do |path|
   iconfig = InventoryConfig.new(path: path)
   erb :index, locals: { iconfig: iconfig }
 end
-

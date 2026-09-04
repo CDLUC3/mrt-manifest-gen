@@ -30,7 +30,10 @@
 </ul>
 <h3>Prefixes</h3>
 <ul>
+  <li><a href="<%= iconfig.top_path %>"><%= iconfig.top_name %></a></li>
+  <%unless iconfig.path.empty? %>
   <li><a href="<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></li>
+  <% end %>
   <% iconfig.inventory.prefixes.each do |prefix| %>
     <li><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></li>
   <% end %>
