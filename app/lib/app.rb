@@ -4,11 +4,13 @@ require 'aws-sdk-s3'
 require 'csv'
 require 'net/http'
 require 'uri'
+require 'nokogiri'
 require_relative 'inventory'
 
 ## Inventory configuration options for different modes of listing an inventory
 class InventoryConfig
   INVENTORY_FILE = '/tmp/inventory-file.csv'
+  INVENTORY_XML = '/tmp/inventory-file.xml'
 
   def initialize(path: '')
     @path = path
@@ -37,21 +39,34 @@ class InventoryConfig
     when 'inventoryurl'
       @url = ENV.fetch('MANIFEST_URL', '')
       @source = @url
-      url_reload(@url, path: path) if reload_needed
+      url_reload(@url, INVENTORY_FILE, path: path) if reload_needed
+      @inventory.load_from_csv(INVENTORY_FILE, path: path)
     when 'httpsapi'
-      @source = ENV.fetch('MANIFEST_URL', '')
+      @source = ENV.fetch('MANIFEST_BUCKET', '')
+      https_reload(@source) if reload_needed
     end
   end
 
-  def url_reload(url, path: '')
+  def https_reload(url)
+    url_reload(url, INVENTORY_XML)
+    @inventory.file_init(INVENTORY_FILE)
+    doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
+    doc.xpath('//Contents').each do |content|
+      key = content.xpath('Key').text
+      size = content.xpath('Size').text.to_i
+      last_modified = content.xpath('LastModified').text
+      @inventory.add(key, size, last_modified, path: @path, filepath: INVENTORY_FILE)
+    end
+  end
+
+  def url_reload(url, localfile, path: '')
     uri = URI.parse(url)
     raise ArgumentError, "Unsupported URL scheme: #{uri.scheme}" unless %w[http https].include?(uri.scheme)
 
     response = Net::HTTP.get_response(uri)
     raise "Failed to fetch #{uri}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
-    File.write(INVENTORY_FILE, response.body)
-    @inventory.load_from_csv(INVENTORY_FILE, path: path)
+    File.write(localfile, response.body)
   end
 
   def s3_reload(bucket, prefix, path: '')
