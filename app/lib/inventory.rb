@@ -31,8 +31,10 @@ class Inventory
   end
 
   def file_init(filepath)
-    CSV.open(filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
-      csv << %w[key size last_modified]
+    if File.exist?(filepath)
+      CSV.open(filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
+        csv << %w[key size last_modified]
+      end
     end
     filepath
   end
