@@ -20,7 +20,9 @@ COPY Gemfile* /var/task/
 # Bundle dependencies
 RUN bundle install
 
-COPY . /var/task
+COPY app /var/task/app
+COPY inventory /var/task/inventory
+COPY lambda_function.rb /var/task
 COPY .bundle/config /var/task/.bundle/config
 RUN bundle install
 
