@@ -9,8 +9,8 @@ require_relative 'inventory'
 
 ## Inventory configuration options for different modes of listing an inventory
 class InventoryConfig
-  INVENTORY_FILE = '/tmp/inventory-file.csv'
-  INVENTORY_XML = '/tmp/inventory-file.xml'
+  INVENTORY_FILE = '/tmp/inventory/inventory-file.csv'
+  INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
 
   def initialize(path: '')
     @path = path

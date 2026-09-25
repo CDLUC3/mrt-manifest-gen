@@ -1,3 +1,4 @@
 vendor/
 
-inventory-file.csv
+inventory/inventory-file.csv
+inventory/inventory-file.xml

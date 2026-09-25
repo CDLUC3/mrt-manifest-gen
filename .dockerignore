@@ -2,3 +2,5 @@ Dockerfile
 README.md
 docker-compose.yml
 vendor/
+inventory/inventory-file.csv
+inventory/inventory-file.xml
