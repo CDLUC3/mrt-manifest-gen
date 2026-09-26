@@ -31,8 +31,7 @@ class Inventory
   end
 
   def file_init(filepath)
-    puts %x[ls -l /tmp]
-    puts %x[ls -l /tmp/inventory]
+    %x[mkdir -p /tmp/inventory]
     CSV.open(filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
       csv << %w[key size last_modified]
     end
