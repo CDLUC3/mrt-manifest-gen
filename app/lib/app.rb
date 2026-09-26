@@ -66,6 +66,7 @@ class InventoryConfig
     response = Net::HTTP.get_response(uri)
     raise "Failed to fetch #{uri}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
+    %x[mkdir -p /tmp/inventory]
     File.write(localfile, response.body)
   end
 
