@@ -13,6 +13,7 @@ RUN dnf -y install gcc make git
 ENV RACK_CONFIG=app/config_mrt.ru
 ENV TZ=America/Los_Angeles
 
+RUN mkdir -p /tmp/inventory
 WORKDIR /var/task
 # Add Admin Tool Code to the image
 COPY Gemfile* /var/task/
