@@ -8,24 +8,37 @@ services:
     environment:
       AWS_PROFILE: ${AWS_PROFILE:-default}
       AWS_REGION: ${AWS_REGION:-us-west-2}
+      
+      PROJECT_NAME: ${PROJECT_NAME:-not-applicable}
+
       # Allowed values: s3api, httpsapi, inventoryfile, inventoryurl
       MANIFEST_MODE: ${MANIFEST_MODE:-s3api}
-      # In s3api mode, this is the name of the bucket
-      # In httpsapi mode, this is the base URL to reach the bucket
-      MANIFEST_BUCKET: ${MANIFEST_BUCKET:-not_applicable}
-      # This will trigger only a subset of paths to be loaded
+      # In s3api mode, MANIFEST_BUCKET is the name of the bucket
+      MANIFEST_BUCKET: ${MANIFEST_BUCKET:-merritt-ingest-workspace-${PROJECT_NAME}}
+
+      # MANIFEST_MODE: httpsapi
+      # In httpsapi mode, MANIFEST_BUCKET is the base URL to reach the bucket
+      # MANIFEST_BUCKET: ${MANIFEST_BUCKET:-https://merritt-ingest-workspace-${PROJECT_NAME}.s3.${AWS_REGION}.amazonaws.com}
+
+      # MANIFEST_MODE: inventoryfile
+      # In inventoryfile mode, MANIFEST_FILE is the path to the inventory file
+      # MANIFEST_FILE: ...csv
+
+      # MANIFEST_MODE: inventoryurl
+      # In inventoryurl mode, MANIFEST_URL is the URL to reach the inventory file
+      # MANIFEST_URL: https://...csv
+
+      # This will trigger only a subset of paths to be (re)loaded
       MANIFEST_PREFIX: ${MANIFEST_PREFIX:-}
-      # MANIFEST_URL is the URL prefix to assign to manifest enties.
-      # MANIFEST_URL: 
-      # INVENTORY_FILE is the location where the inventory will be cached.
-      # INVENTORY_FILE: ${INVENTORY_FILE:-/app/inventory-file.csv}
-      # INVENTORY_BUCKET/INVENTORY_KEY will store a cached version of the inventory when running as a lambda.
-      #   A unique key should be used for each workspace.
-      # INVENTORY_BUCKET:
-      # INVENTORY_KEY:
-    volumes:
+
+      # Cache Mode: S3 or local
+      CACHE_MODE: ${CACHE_MODE:-S3}
+      CACHE_BUCKET: ${CACHE_BUCKET:-merritt-ingest-workspace-cache}
+      # CACHE_FOLDER: /tmp/cache
+
+    volumes:      
       - ~/.aws:/root/.aws:ro
-      - ./inventory:/tmp/inventory
+      #- ./inventory:/tmp/inventory
     ports:
       - "9292:9292"
     entrypoint:
