@@ -47,8 +47,10 @@ class InventoryConfig
     end
   end
 
-  def https_reload(url)
-    url_reload(url, INVENTORY_XML)
+  def https_reload(url, token = '')
+    turl = "#{url}&max-keys=5"
+    turl += "&continuation-token=#{token}" unless token.empty?
+    url_reload(turl, INVENTORY_XML)
     @inventory.file_init(INVENTORY_FILE)
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
     doc.xpath('//Contents').each do |content|
@@ -56,6 +58,9 @@ class InventoryConfig
       size = content.xpath('Size').text.to_i
       last_modified = content.xpath('LastModified').text
       @inventory.add(key, size, last_modified, path: @path, filepath: INVENTORY_FILE)
+    end
+    doc.xpath('//NextContinuationToken').each do |token|
+      https_reload(url, token.text)
     end
   end
 
