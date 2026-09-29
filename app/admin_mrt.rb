@@ -11,6 +11,9 @@ set :bind, '0.0.0.0'
 register Sinatra::Contrib
 
 get '/*' do |path|
-  iconfig = InventoryConfig.new(path: path)
+  iconfig = InventoryConfig.new(
+    path: path, 
+    reload: request.params.fetch('reload', 'false') == 'true'
+  )
   erb :index, locals: { iconfig: iconfig }
 end

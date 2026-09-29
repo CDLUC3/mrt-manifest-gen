@@ -14,8 +14,9 @@ class InventoryConfig
   INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
   MAXKEYS = 5
 
-  def initialize(path: '')
+  def initialize(path: '', reload: false)
     @path = path
+    @reload = reload
     # Allowed values: s3api, httpsapi, inventoryfile, inventoryurl
     @mode = ENV.fetch('MANIFEST_MODE', 's3api')
     @prefix = ENV.fetch('MANIFEST_PREFIX', '')
@@ -34,18 +35,27 @@ class InventoryConfig
     when 's3api'
       bucket = ENV.fetch('MANIFEST_BUCKET', '')
       @source = "s3://#{bucket}/#{@prefix}"
-      s3_reload(bucket, @prefix, path: path) if reload_needed
+      if reload_needed
+        @inventory.reset
+        s3_reload(bucket, @prefix, path: path)
+      end
     when 'inventoryfile'
       @file = ENV.fetch('MANIFEST_FILE', '')
       @source = 'file://app/inventory-file.csv'
     when 'inventoryurl'
       @url = ENV.fetch('MANIFEST_URL', '')
       @source = @url
-      url_reload(@url, INVENTORY_FILE, path: path) if reload_needed
+      if reload_needed
+        @inventory.reset
+        url_reload(@url, INVENTORY_FILE, path: path)
+      end
       @inventory.load_from_csv(INVENTORY_FILE, path: path)
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
-      https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}") if reload_needed
+      if reload_needed
+        @inventory.reset
+        https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
+      end
     end
   end
 
@@ -108,6 +118,7 @@ class InventoryConfig
   def reload_needed
     return true if last_updated.nil?
     return true if @inventory.count.zero?
+    return true if @reload
 
     last_updated < (Time.now - 180) # Reload if older than 3 minutes
   end

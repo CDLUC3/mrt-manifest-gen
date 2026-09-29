@@ -27,6 +27,8 @@
 <ul>
   <li>Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
   <li>Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
+  <li>Reload Param: <%= iconfig.reload ? 'Yes' : 'No' %></li>
+  <li>Reload Needed: <%= iconfig.reload_needed ? 'Yes' : 'No' %></li>
 </ul>
 <h3>Prefixes</h3>
 <ul>
@@ -46,7 +48,7 @@
     <th>Size</th>
     <th>Last Modified</th>
   </tr>
-  <% iconfig.inventory.files.each do |file| %>
+  <% iconfig.inventory.files.each do |key, file| %>
   <tr>
     <td><%= file[:key] %></td>
     <td class="data"><%= Inventory.format_int(file[:size]) %></td>

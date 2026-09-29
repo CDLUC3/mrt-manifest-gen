@@ -15,7 +15,7 @@ class Inventory
     @count = 0
     @bytes = 0
     @prefixes = []
-    @files = []
+    @files = {}
     @count_by_extension = {}
     @bytes_by_extension = {}
   end
@@ -49,7 +49,7 @@ class Inventory
     current_path = path.empty? ? key : key[(path.length + 1)..]
     parent_path = current_path.split('/')[0]
     if current_path == parent_path
-      @files << { key: key, size: size, last_modified: last_modified }
+      @files[key] = { key: key, size: size, last_modified: last_modified }
     else
       @prefixes << parent_path unless @prefixes.include?(parent_path)
     end
@@ -64,6 +64,15 @@ class Inventory
     file_init(filepath) unless File.exist?(filepath)
     CSV.open(filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
       csv << [key, size, last_modified]
+    end
+  end
+
+  def write_to_csv(filepath)
+    file_init(filepath)
+    CSV.open(filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
+      @files.each do |key, file_info|
+        csv << [file_info[:key], file_info[:size], file_info[:last_modified]]
+      end
     end
   end
 
