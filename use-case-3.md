@@ -23,6 +23,11 @@ graph LR
 
   subgraph UC3VPC
     Ingest([Ingest Service])
+    UI([Merritt UI])
+  end
+
+  subgraph Desktop
+    Checkm[/Merritt Batch Manifest Checkm/]
   end
 
   DAMS --> InventoryFile
@@ -30,6 +35,9 @@ graph LR
   DAMS --> |Https| Ingest
   ManifestGeneratorLambda <--> |S3Api| S3CacheBucket
   S3CacheBucket --> |S3HttpsApi| Ingest
+  ManifestGeneratorLambda --> |Download| Checkm
+  Checkm --> |Upload| UI
+  UI -.-> Ingest
 ```
 
 ## Testing in Docker Compose

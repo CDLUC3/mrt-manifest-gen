@@ -26,7 +26,12 @@ graph LR
 
   subgraph UC3VPC
     Ingest([Ingest Service])
-    IngestWorkspaceEC2[/Ingest Workspace ECS/]
+    UI([Merritt UI])
+    IngestWorkspaceEC2[/Ingest Workspace EC2 - Curation/]
+  end
+
+  subgraph Desktop
+    Checkm[/Merritt Batch Manifest Checkm/]
   end
 
   ExternalMedia --> |S3Api| S3SourceBucket
@@ -35,6 +40,9 @@ graph LR
   S3SourceBucket <--> |MountS3| IngestWorkspaceEC2
   ManifestGeneratorLambda <--> |S3Api| S3CacheBucket
   S3CacheBucket --> |S3HttpsApi| Ingest
+  ManifestGeneratorLambda --> |Download| Checkm
+  Checkm --> |Upload| UI
+  UI -.-> Ingest
 ```
 
 ## Configuration Needs

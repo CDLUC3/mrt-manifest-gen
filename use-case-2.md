@@ -21,13 +21,21 @@ graph LR
 
   subgraph UC3VPC
     ManifestGeneratorLambda([Manifest Generator Lambda])
+    UI([Merritt UI])
     Ingest([Ingest Service])
+  end
+
+  subgraph Desktop
+    Checkm[/Merritt Batch Manifest Checkm/]
   end
 
   S3SourceBucket --> |S3HttpsApi| ManifestGeneratorLambda
   S3SourceBucket --> |S3HttpsApi| Ingest
   ManifestGeneratorLambda <--> |S3Api| S3CacheBucket
   S3CacheBucket --> |S3HttpsApi| Ingest
+  ManifestGeneratorLambda --> |Download| Checkm
+  Checkm --> |Upload| UI
+  UI -.-> Ingest
 ```
 
 ## Configuration Needs
