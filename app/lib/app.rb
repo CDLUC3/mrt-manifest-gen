@@ -4,6 +4,7 @@ require 'aws-sdk-s3'
 require 'csv'
 require 'net/http'
 require 'uri'
+require 'cgi'
 require 'nokogiri'
 require_relative 'inventory'
 
@@ -11,6 +12,7 @@ require_relative 'inventory'
 class InventoryConfig
   INVENTORY_FILE = '/tmp/inventory/inventory-file.csv'
   INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
+  MAXKEYS = 5
 
   def initialize(path: '')
     @path = path
@@ -43,13 +45,13 @@ class InventoryConfig
       @inventory.load_from_csv(INVENTORY_FILE, path: path)
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
-      https_reload("#{@source}/?list-type=2") if reload_needed
+      https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}") if reload_needed
     end
   end
 
   def https_reload(url, token = '')
-    turl = "#{url}&max-keys=5"
-    turl += "&continuation-token=#{token}" unless token.empty?
+    turl = url.dup
+    turl += "&continuation-token=#{CGI.escape(token)}" unless token.empty?
     url_reload(turl, INVENTORY_XML)
     @inventory.file_init(INVENTORY_FILE)
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
@@ -85,7 +87,8 @@ class InventoryConfig
       response = s3_client.list_objects_v2(
         bucket: bucket,
         prefix: prefix,
-        continuation_token: continuation_token
+        continuation_token: continuation_token,
+        max_keys: MAXKEYS
       )
       response.contents.each do |object|
         @inventory.add(object.key, object.size, object.last_modified, path: path, filepath: INVENTORY_FILE)
