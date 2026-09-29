@@ -2,3 +2,4 @@ vendor/
 
 inventory/inventory-file.csv
 inventory/inventory-file.xml
+test.xml
