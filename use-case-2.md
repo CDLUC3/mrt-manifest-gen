@@ -55,7 +55,8 @@ PROJECT_NAME=xxx docker compose -f docker-compose.yml -f use-case-2.yml up -d --
 
 ```bash
 PROJECT_NAME=xxx \
+AWS_REGION=us-west-2 \
 MANIFEST_MODE=httpsapi \
-${MANIFEST_BUCKET:-https://merritt-ingest-workspace-${PROJECT_NAME}.s3.${AWS_REGION}.amazonaws.com} \
+MANIFEST_BUCKET=${MANIFEST_BUCKET:-https://merritt-ingest-workspace-${PROJECT_NAME}.s3.${AWS_REGION}.amazonaws.com} \
 bundle exec puma app/config_mrt.ru
 ```
