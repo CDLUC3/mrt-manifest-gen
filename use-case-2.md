@@ -52,7 +52,6 @@ graph LR
 PROJECT_NAME=xxx docker compose -f docker-compose.yml -f use-case-2.yml up -d --build
 ```
 
-
 ```bash
 PROJECT_NAME=xxx \
 AWS_REGION=us-west-2 \

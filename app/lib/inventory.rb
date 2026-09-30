@@ -45,9 +45,6 @@ class Inventory
     gparent_path = File.dirname(parent_path) == '.' ? '' : File.dirname(parent_path)
     ext = File.extname(key).downcase
 
-    puts "#{key}, #{parent_path}, #{gparent_path}"
-
-
     @dirs[parent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
     @dirs[parent_path][:count] += 1
     @dirs[parent_path][:bytes] += size
@@ -109,5 +106,9 @@ class Inventory
     @dirs[path][:prefixes]
   end
 
-  attr_reader :dirs
+  def dirs(path)
+    return [] unless @dirs.key?(path) 
+
+    @dirs[path]
+  end
 end
