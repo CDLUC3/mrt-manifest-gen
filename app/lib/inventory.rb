@@ -103,6 +103,7 @@ class Inventory
         body: File.read(@filepath)
       )
     end
+    @last_updated = File.mtime(@filepath)
   end
 
   def self.format_int(vint)
