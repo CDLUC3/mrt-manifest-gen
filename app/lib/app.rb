@@ -18,18 +18,14 @@ class InventoryConfig
     @path = path
     @reload = reload
     # Allowed values: s3api, httpsapi, inventoryfile, inventoryurl
+    @cache_bucket = ENV.fetch('CACHE_BUCKET', '')
+    @project = ENV.fetch('PROJECT_NAME', 'not-applicable')
     @mode = ENV.fetch('MANIFEST_MODE', 's3api')
     @prefix = ENV.fetch('MANIFEST_PREFIX', '')
     @source = ''
 
-    @inventory = Inventory.new
-    if File.exist?(INVENTORY_FILE)
-      begin
-        @inventory.load_from_csv(INVENTORY_FILE, path: path)
-      rescue StandardError
-        # if the file cannot be read, continue processing
-      end
-    end
+    @inventory = Inventory.new(self)
+    @inventory.load_csv
 
     case @mode
     when 's3api'
@@ -39,6 +35,14 @@ class InventoryConfig
         @inventory.reset
         s3_reload(bucket, @prefix, path: path)
       end
+    when 'httpsapi'
+      @source = ENV.fetch('MANIFEST_BUCKET', '')
+      if reload_needed
+        @inventory.reset
+        https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
+      end
+    
+    # Not yet implemented
     when 'inventoryfile'
       @file = ENV.fetch('MANIFEST_FILE', '')
       @source = 'file://app/inventory-file.csv'
@@ -49,13 +53,7 @@ class InventoryConfig
         @inventory.reset
         url_reload(@url, INVENTORY_FILE, path: path)
       end
-      @inventory.load_from_csv(INVENTORY_FILE, path: path)
-    when 'httpsapi'
-      @source = ENV.fetch('MANIFEST_BUCKET', '')
-      if reload_needed
-        @inventory.reset
-        https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
-      end
+      @inventory.load_from_csv(path: path)
     end
   end
 
@@ -63,17 +61,18 @@ class InventoryConfig
     turl = url.dup
     turl += "&continuation-token=#{CGI.escape(token)}" unless token.empty?
     url_reload(turl, INVENTORY_XML)
-    @inventory.file_init(INVENTORY_FILE)
+    @inventory.file_init
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
     doc.xpath('//Contents').each do |content|
       key = content.xpath('Key').text
       size = content.xpath('Size').text.to_i
       last_modified = content.xpath('LastModified').text
-      @inventory.add(key, size, last_modified, path: @path, filepath: INVENTORY_FILE)
+      @inventory.add(key, size, last_modified, path: @path)
     end
     doc.xpath('//NextContinuationToken').each do |token|
       https_reload(url, token.text)
     end
+    @inventory.save
   end
 
   def url_reload(url, localfile, path: '')
@@ -91,7 +90,7 @@ class InventoryConfig
     s3_client = Aws::S3::Client.new(
       region: ENV.fetch('AWS_REGION', 'us-west-2')
     )
-    @inventory.file_init(INVENTORY_FILE)
+    @inventory.file_init
     continuation_token = nil
     loop do
       response = s3_client.list_objects_v2(
@@ -101,26 +100,21 @@ class InventoryConfig
         max_keys: MAXKEYS
       )
       response.contents.each do |object|
-        @inventory.add(object.key, object.size, object.last_modified, path: path, filepath: INVENTORY_FILE)
+        @inventory.add(object.key, object.size, object.last_modified, path: path)
       end
       break unless response.is_truncated
 
       continuation_token = response.next_continuation_token
     end
-  end
-
-  def last_updated
-    return unless File.exist?(INVENTORY_FILE)
-
-    File.mtime(INVENTORY_FILE)
+    @inventory.save
   end
 
   def reload_needed
-    return true if last_updated.nil?
+    return true if @inventory.last_updated.nil?
     return true if @inventory.count.zero?
     return true if @reload
 
-    last_updated < (Time.now - 180) # Reload if older than 3 minutes
+    @inventory.last_updated < (Time.now - 180) # Reload if older than 3 minutes
   end
 
   def prefix_path(folder)
@@ -148,5 +142,5 @@ class InventoryConfig
     @path.empty? ? top_name : '.. (parent)'
   end
 
-  attr_reader :mode, :prefix, :reload, :source, :file, :url, :inventory, :path
+  attr_reader :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project
 end

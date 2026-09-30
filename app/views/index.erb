@@ -21,14 +21,18 @@
   <dt>Mode</dt>
   <dd><%= iconfig.mode %></dd>
   <dt>Last Updated</dt>
-  <dd><%= iconfig.last_updated %></dd>
+  <dd><%= Time.at(iconfig.inventory.last_updated).localtime.strftime("%Y-%m-%d %H:%M:%S") %></dd>
+  <dt>Reload Param</dt>
+  <dd><%= iconfig.reload ? 'Yes' : 'No' %></dd>
+  <dt>Reload Needed</dt>
+  <dd><%= iconfig.reload_needed ? 'Yes' : 'No' %></dd>
+  <dt>Cache Bucket</dt>
+  <dd><%= iconfig.cache_bucket %></dd>
 </dl>
 <h3>Stats</h3>
 <ul>
   <li>Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
   <li>Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
-  <li>Reload Param: <%= iconfig.reload ? 'Yes' : 'No' %></li>
-  <li>Reload Needed: <%= iconfig.reload_needed ? 'Yes' : 'No' %></li>
 </ul>
 <h3>Prefixes</h3>
 <ul>

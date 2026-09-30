@@ -7,7 +7,10 @@ require 'uri'
 
 ## Track inventory statistics for the portion of the inventory being analyzed
 class Inventory
-  def initialize
+  def initialize(iconfig)
+    @filepath = InventoryConfig::INVENTORY_FILE
+    @iconfig = iconfig
+    @last_updated = nil
     reset
   end
 
@@ -16,9 +19,33 @@ class Inventory
     @prefixes = []
   end
 
-  def load_from_csv(file_path, path: '')
+  def get_csv
+    if @iconfig.cache_bucket.empty?
+      file_init unless File.exist?(@filepath)
+      @last_updated = File.mtime(@filepath)
+      File.read(@filepath)
+    else
+      begin
+        s3_client = Aws::S3::Client.new(
+          region: ENV.fetch('AWS_REGION', 'us-west-2')
+        )
+        obj = s3_client.get_object(
+          bucket: @iconfig.cache_bucket,
+          key: "#{@iconfig.project}/inventory/inventory-file.csv"
+        )
+        @last_updated = obj.last_modified
+        obj.body.read
+      rescue Aws::S3::Errors::NoSuchKey
+        file_init
+        @last_updated = File.mtime(@filepath)
+        File.read(@filepath)
+      end
+    end
+  end
+
+  def load_csv(path: '')
     reset
-    CSV.parse(File.read(file_path), headers: true, col_sep: "\t", row_sep: "\n") do |row|
+    CSV.parse(get_csv, headers: true, col_sep: "\t", row_sep: "\n") do |row|
       key = row['key']
       size = row['size'].to_i
       last_modified = row['last_modified']
@@ -26,15 +53,14 @@ class Inventory
     end
   end
 
-  def file_init(filepath)
-    %x[mkdir -p /tmp/inventory]
-    CSV.open(filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
+  def file_init
+    %x[mkdir -p #{File.dirname(@filepath)}]
+    CSV.open(@filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
       csv << %w[key size last_modified]
     end
-    filepath
   end
 
-  def add(key, size, last_modified, path: '', filepath: nil)
+  def add(key, size, last_modified, path: '')
     return if key.nil?
     return if key.empty?
     # return unless key.start_with?(path)
@@ -51,28 +77,31 @@ class Inventory
     @dirs[parent_path][:extensions][ext] ||= { count: 0, bytes: 0 }
     @dirs[parent_path][:extensions][ext][:count] += 1
     @dirs[parent_path][:extensions][ext][:bytes] += size
-    if path == parent_path
-      @dirs[parent_path][:files] << { key: current_path, size: size, last_modified: last_modified }
-    end
+    @dirs[parent_path][:files] << { key: current_path, size: size, last_modified: last_modified }
 
     unless parent_path.empty?
       @dirs[gparent_path][:prefixes] << parent_path unless @dirs[gparent_path][:prefixes].include?(parent_path)
     end
-
-    return if filepath.nil?
-
-    file_init(filepath) unless File.exist?(filepath)
-    CSV.open(filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
-      csv << [key, size, last_modified]
-    end
   end
 
-  def write_to_csv(filepath)
-    file_init(filepath)
-    CSV.open(filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
-      @files.each do |key, file_info|
-        csv << [file_info[:key], file_info[:size], file_info[:last_modified]]
+  def save
+    file_init
+    CSV.open(@filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
+      @dirs.each do |path, dir_info|
+        dir_info[:files].each do |file_info|
+          csv << [file_info[:key], file_info[:size], file_info[:last_modified]]
+        end
       end
+    end
+    unless @iconfig.cache_bucket.empty?
+      s3_client = Aws::S3::Client.new(
+        region: ENV.fetch('AWS_REGION', 'us-west-2')
+      )
+      s3_client.put_object(
+        bucket: @iconfig.cache_bucket,
+        key: "#{@iconfig.project}/inventory/inventory-file.csv",
+        body: File.read(@filepath)
+      )
     end
   end
 
@@ -111,4 +140,6 @@ class Inventory
 
     @dirs[path]
   end
+
+  attr_reader :last_updated
 end
