@@ -12,12 +12,8 @@ class Inventory
   end
 
   def reset
-    @count = 0
-    @bytes = 0
+    @dirs = {}
     @prefixes = []
-    @files = {}
-    @count_by_extension = {}
-    @bytes_by_extension = {}
   end
 
   def load_from_csv(file_path, path: '')
@@ -41,23 +37,30 @@ class Inventory
   def add(key, size, last_modified, path: '', filepath: nil)
     return if key.nil?
     return if key.empty?
-    return unless key.start_with?(path)
+    # return unless key.start_with?(path)
 
     size = 0 if size.nil?
-    @count += 1
-    @bytes += size
     current_path = path.empty? ? key : key[(path.length + 1)..]
-    parent_path = current_path.split('/')[0]
-    if current_path == parent_path
-      @files[key] = { key: key, size: size, last_modified: last_modified }
-    else
-      @prefixes << parent_path unless @prefixes.include?(parent_path)
-    end
+    parent_path = File.dirname(key) == '.' ? '' : File.dirname(key)
+    gparent_path = File.dirname(parent_path) == '.' ? '' : File.dirname(parent_path)
     ext = File.extname(key).downcase
-    @count_by_extension[ext] ||= 0
-    @bytes_by_extension[ext] ||= 0
-    @count_by_extension[ext] += 1
-    @bytes_by_extension[ext] += size
+
+    puts "#{key}, #{parent_path}, #{gparent_path}"
+
+
+    @dirs[parent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
+    @dirs[parent_path][:count] += 1
+    @dirs[parent_path][:bytes] += size
+    @dirs[parent_path][:extensions][ext] ||= { count: 0, bytes: 0 }
+    @dirs[parent_path][:extensions][ext][:count] += 1
+    @dirs[parent_path][:extensions][ext][:bytes] += size
+    if path == parent_path
+      @dirs[parent_path][:files] << { key: current_path, size: size, last_modified: last_modified }
+    end
+
+    unless parent_path.empty?
+      @dirs[gparent_path][:prefixes] << parent_path unless @dirs[gparent_path][:prefixes].include?(parent_path)
+    end
 
     return if filepath.nil?
 
@@ -80,5 +83,31 @@ class Inventory
     vint.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse
   end
 
-  attr_reader :count, :bytes, :prefixes, :count_by_extension, :bytes_by_extension, :files
+  def count
+    @dirs.values.sum { |dir| dir[:count] }
+  end
+  
+  def bytes
+    @dirs.values.sum { |dir| dir[:bytes] }
+  end
+
+  def files(path)
+    return [] unless @dirs.key?(path)
+
+    @dirs[path][:files]
+  end
+
+  def extensions(path)
+    return {} unless @dirs.key?(path)
+      
+    @dirs[path][:extensions]
+  end
+
+  def prefixes(path)
+    return [] unless @dirs.key?(path) 
+    
+    @dirs[path][:prefixes]
+  end
+
+  attr_reader :dirs
 end

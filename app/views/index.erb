@@ -17,7 +17,7 @@
   <dt>Prefix</dt>
   <dd><%= iconfig.prefix %></dd>
   <dt>Path</dt>
-  <dd><%= iconfig.path %></dd>
+  <dd>"<%= iconfig.path %>"</dd>
   <dt>Mode</dt>
   <dd><%= iconfig.mode %></dd>
   <dt>Last Updated</dt>
@@ -36,7 +36,7 @@
   <%unless iconfig.path.empty? %>
   <li><a href="<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></li>
   <% end %>
-  <% iconfig.inventory.prefixes.each do |prefix| %>
+  <% iconfig.inventory.prefixes(iconfig.path).each do |prefix| %>
     <li><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></li>
   <% end %>
 </ul>
@@ -48,7 +48,7 @@
     <th>Size</th>
     <th>Last Modified</th>
   </tr>
-  <% iconfig.inventory.files.each do |key, file| %>
+  <% iconfig.inventory.files(iconfig.path).each do |file| %>
   <tr>
     <td><%= file[:key] %></td>
     <td class="data"><%= Inventory.format_int(file[:size]) %></td>
@@ -64,11 +64,11 @@
     <th>Count</th>
     <th>Bytes</th>
   </tr>
-  <% iconfig.inventory.count_by_extension.each do |ext, count| %>
+  <% iconfig.inventory.extensions(iconfig.path).each do |ext, info| %>
   <tr>
     <td><%= ext %></td>
-    <td class="data"><%= Inventory.format_int(count) %></td>
-    <td class="data"><%= Inventory.format_int(iconfig.inventory.bytes_by_extension[ext]) %></td>
+    <td class="data"><%= Inventory.format_int(info[:count]) %></td>
+    <td class="data"><%= Inventory.format_int(info[:bytes]) %></td>
   </tr>
   <% end %>
 </table>

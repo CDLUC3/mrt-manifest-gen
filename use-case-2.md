@@ -51,3 +51,11 @@ graph LR
 ```bash
 PROJECT_NAME=xxx docker compose -f docker-compose.yml -f use-case-2.yml up -d --build
 ```
+
+
+```bash
+PROJECT_NAME=xxx \
+MANIFEST_MODE=httpsapi \
+${MANIFEST_BUCKET:-https://merritt-ingest-workspace-${PROJECT_NAME}.s3.${AWS_REGION}.amazonaws.com} \
+bundle exec puma app/config_mrt.ru
+```
