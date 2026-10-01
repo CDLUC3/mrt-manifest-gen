@@ -67,7 +67,7 @@ class InventoryConfig
       key = content.xpath('Key').text
       size = content.xpath('Size').text.to_i
       last_modified = content.xpath('LastModified').text
-      @inventory.add(key, size, last_modified, path: @path)
+      @inventory.add(key, size, last_modified)
     end
     doc.xpath('//NextContinuationToken').each do |token|
       return https_reload(url, token.text)
@@ -100,7 +100,7 @@ class InventoryConfig
         max_keys: MAXKEYS
       )
       response.contents.each do |object|
-        @inventory.add(object.key, object.size, object.last_modified, path: path)
+        @inventory.add(object.key, object.size, object.last_modified)
       end
       break unless response.is_truncated
 

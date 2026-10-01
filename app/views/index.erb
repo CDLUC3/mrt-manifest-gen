@@ -6,6 +6,10 @@
 </head>
 <body>
 <h1>Manifest Generator for <%= iconfig.project %></h1>
+<form method="get" action="/<%= iconfig.path %>">
+  <input type="hidden" name="reload" value="true">
+  <input type="submit" value="Reload Inventory">
+</form>
 <dl>
   <dt>Source Bucket</dt>
   <dd>"<%= iconfig.source %>"</dd>

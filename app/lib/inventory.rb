@@ -49,7 +49,7 @@ class Inventory
       key = row['key']
       size = row['size'].to_i
       last_modified = row['last_modified']
-      add(key, size, last_modified, path: path)
+      add(key, size, last_modified)
     end
   end
 
@@ -60,13 +60,13 @@ class Inventory
     end
   end
 
-  def add(key, size, last_modified, path: '')
+  def add(key, size, last_modified)
     return if key.nil?
     return if key.empty?
     # return unless key.start_with?(path)
 
     size = 0 if size.nil?
-    current_path = path.empty? ? key : key[(path.length + 1)..]
+    current_path = key
     parent_path = File.dirname(key) == '.' ? '' : File.dirname(key)
     gparent_path = File.dirname(parent_path) == '.' ? '' : File.dirname(parent_path)
     ext = File.extname(key).downcase
