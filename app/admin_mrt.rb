@@ -7,7 +7,6 @@ require 'sinatra/contrib'
 require_relative 'lib/app'
 
 set :bind, '0.0.0.0'
-set :public_folder, File.dirname(__FILE__) + '/public'
 
 register Sinatra::Contrib
 
