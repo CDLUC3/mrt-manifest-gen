@@ -137,10 +137,26 @@ class Inventory
   end
 
   def dirs(path)
-    return [] unless @dirs.key?(path) 
+    return {} unless @dirs.key?(path) 
 
     @dirs[path]
   end
 
-  attr_reader :last_updated
+  def path_count(path)
+    total = dirs(path).fetch(:count, 0)
+    prefixes(path).each do |prefix|
+      total += path_count(prefix)
+    end
+    total
+  end
+
+  def path_bytes(path)
+    total = dirs(path).fetch(:bytes, 0)
+    prefixes(path).each do |prefix|
+      total += path_bytes(prefix)
+    end
+    total
+  end
+
+attr_reader :last_updated
 end

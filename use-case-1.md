@@ -61,6 +61,7 @@ PROJECT_NAME=xxx docker compose up -d --build
 
 ```bash
 PROJECT_NAME=xxx \
+CACHE_BUCKET=${CACHE_BUCKET:-merritt-ingest-workspace-cache} \
 MANIFEST_BUCKET=${MANIFEST_BUCKET:-merritt-ingest-workspace-${PROJECT_NAME}} \
 bundle exec puma app/config_mrt.ru
 ```

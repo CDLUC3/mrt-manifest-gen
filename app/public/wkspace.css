@@ -1,0 +1,23 @@
+table { border-collapse: collapse; width: 70%; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+th { background-color: #f2f2f2; }
+.data { text-align: right; }
+
+dl {
+  border: 3px double #ccc;
+  padding: 10px;
+}
+dt {
+  float: left;
+  clear: left;
+  width: 200px;
+  text-align: right;
+  font-weight: bold;
+  color: green;
+}
+dt::after {
+  content: ": ";
+}
+dd {
+  margin: 0 0 0 210px;
+}

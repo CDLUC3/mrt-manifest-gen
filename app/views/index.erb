@@ -1,22 +1,16 @@
 <html>
 <head>
   <title>Manifest Generator</title>
-  <style>
-    table { border-collapse: collapse; width: 70%; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    .data { text-align: right; }
-    dt { font-weight: bold; }
-    dd { margin: 0 0 10px 20px; }
-  </style>
+  <link rel="stylesheet" href="/wkspace.css">
   <link rel="icon" href="/favicon.ico" />
 </head>
 <body>
-<h1>Manifest Generator</h1>
-<h2>Source: <%= iconfig.source %></h2>
+<h1>Manifest Generator for <%= iconfig.project %></h1>
 <dl>
+  <dt>Source Bucket</dt>
+  <dd>"<%= iconfig.source %>"</dd>
   <dt>Prefix</dt>
-  <dd><%= iconfig.prefix %></dd>
+  <dd>"<%= iconfig.prefix %>"</dd>
   <dt>Path</dt>
   <dd>"<%= iconfig.path %>"</dd>
   <dt>Mode</dt>
@@ -32,8 +26,10 @@
 </dl>
 <h3>Stats</h3>
 <ul>
-  <li>Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
-  <li>Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
+  <li>Bucket Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
+  <li>Bucket Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
+  <li>Path Count: <%= Inventory.format_int(iconfig.inventory.path_count(iconfig.path)) %></li>
+  <li>Path Bytes: <%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.path)) %></li>
 </ul>
 <h3>Prefixes</h3>
 <ul>
