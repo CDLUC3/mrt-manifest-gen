@@ -70,7 +70,7 @@ class InventoryConfig
       @inventory.add(key, size, last_modified, path: @path)
     end
     doc.xpath('//NextContinuationToken').each do |token|
-      https_reload(url, token.text)
+      return https_reload(url, token.text)
     end
     @inventory.save
   end
