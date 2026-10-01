@@ -87,9 +87,9 @@ module LambdaFunctions
           body_content += item.to_s
         end
 
-        Sinatra::Application.logger.info("Status: #{status}; Body Length: #{body_content.length}")
-
         is_base64_encoded = headers.fetch('content-type', '').start_with?('image/')
+
+        Sinatra::Application.logger.info("Status: #{status}; Body Length: #{body_content.length}; Is Base64 Encoded: #{is_base64_encoded}")
 
         # We return the structure required by AWS API Gateway since we integrate with it
         # https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
