@@ -10,11 +10,6 @@ set :bind, '0.0.0.0'
 
 register Sinatra::Contrib
 
-get '/favicon.ico' do
-  content_type 'image/x-icon'
-  send_file File.join(settings.public_folder, 'favicon.ico'), :disposition => 'inline'
-end
-
 get '/*' do |path|
   iconfig = InventoryConfig.new(
     path: path, 
