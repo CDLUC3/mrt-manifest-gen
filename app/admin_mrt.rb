@@ -17,3 +17,8 @@ get '/*' do |path|
   )
   erb :index, locals: { iconfig: iconfig }
 end
+
+get '/favicon.ico' do
+  content_type 'image/x-icon'
+  File.open(File.join(settings.public_folder, 'favicon.ico'), 'rb').read
+end
