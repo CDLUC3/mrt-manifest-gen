@@ -142,5 +142,10 @@ class InventoryConfig
     @path.empty? ? top_name : '.. (parent)'
   end
 
+  def parent_path
+    parent = File.dirname(@path)
+    parent == '.' ? '' : parent
+  end
+
   attr_reader :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project
 end

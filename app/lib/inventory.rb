@@ -68,7 +68,6 @@ class Inventory
     size = 0 if size.nil?
     current_path = key
     parent_path = File.dirname(key) == '.' ? '' : File.dirname(key)
-    gparent_path = File.dirname(parent_path) == '.' ? '' : File.dirname(parent_path)
     ext = File.extname(key).downcase
 
     @dirs[parent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
@@ -78,9 +77,15 @@ class Inventory
     @dirs[parent_path][:extensions][ext][:count] += 1
     @dirs[parent_path][:extensions][ext][:bytes] += size
     @dirs[parent_path][:files] << { key: current_path, size: size, last_modified: last_modified }
+    add_prefix(parent_path) unless parent_path.empty?
+  end
 
-    unless parent_path.empty?
-      @dirs[gparent_path][:prefixes] << parent_path unless @dirs[gparent_path][:prefixes].include?(parent_path)
+  def add_prefix(ppath)
+    gparent_path = File.dirname(ppath) == '.' ? '' : File.dirname(ppath)
+    if gparent_path != ppath
+      @dirs[gparent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
+      @dirs[gparent_path][:prefixes] << ppath unless @dirs[gparent_path][:prefixes].include?(ppath)
+      add_prefix(gparent_path)
     end
   end
 
@@ -156,6 +161,14 @@ class Inventory
       total += path_bytes(prefix)
     end
     total
+  end
+
+  def path_depth(path)
+    max_depth = 0
+    prefixes(path).each do |prefix|
+      max_depth = [max_depth, 1 + path_depth(prefix)].max
+    end
+    max_depth 
   end
 
 attr_reader :last_updated

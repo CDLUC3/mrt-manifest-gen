@@ -28,31 +28,81 @@
   <dt>Cache Bucket</dt>
   <dd><%= iconfig.cache_bucket %></dd>
 </dl>
-<h3>Stats</h3>
-<ul>
-  <li>Bucket Count: <%= Inventory.format_int(iconfig.inventory.count) %></li>
-  <li>Bucket Bytes: <%= Inventory.format_int(iconfig.inventory.bytes) %></li>
-  <li>Path Count: <%= Inventory.format_int(iconfig.inventory.path_count(iconfig.path)) %></li>
-  <li>Path Bytes: <%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.path)) %></li>
-</ul>
+
 <h3>Prefixes</h3>
-<ul>
-  <li><a href="<%= iconfig.top_path %>"><%= iconfig.top_name %></a></li>
-  <%unless iconfig.path.empty? %>
-  <li><a href="<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></li>
-  <% end %>
-  <% iconfig.inventory.prefixes(iconfig.path).each do |prefix| %>
-    <li><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></li>
-  <% end %>
-</ul>
+<table>
+  <thead>
+  <tr>
+    <th>Prefix</th>
+    <th>Depth</th>
+    <th>Count</th>
+    <th>Bytes</th>
+    <th>Actions</th>
+  </tr>
+  </thead>
+  <tbody>
+    <% unless iconfig.path.empty? %>
+    <tr>
+      <td><a href="<%= iconfig.top_path %>"><%= iconfig.top_name %></a></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth('')) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count('')) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes('')) %></td>
+      <td/>
+    </tr>
+    <% end %>
+    <% unless iconfig.parent_path.empty? %>
+    <tr>
+      <td><a href="/<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(iconfig.parent_path)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(iconfig.parent_path)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.parent_path)) %></td>
+      <td/>
+    </tr>
+    <% end %>
+    <tr>
+      <td class="current"><span><%= iconfig.path %></span></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(iconfig.path)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(iconfig.path)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.path)) %></td>
+      <td>
+        <form method="POST" action="/manifest">
+          <input type="hidden" name="path" value="<%= iconfig.path %>">
+          <select name="depth">
+            <option value="">Object Manifest</option>
+            <% if iconfig.inventory.path_depth(iconfig.path) > 0 %>
+              <option value="1">Depth 1</option>
+            <% end %>
+            <% for i in 2..iconfig.inventory.path_depth(iconfig.path) %>
+              <option value="<%= i %>">Depth <%= i %></option>
+              <option value="<%= -(i-1) %>">Depth <%= -(i-1) %></option>
+            <% end %>
+          </select>
+          <input type="submit" value="Make Manifest">
+        </form>
+      </td>
+    </tr>
+    <% iconfig.inventory.prefixes(iconfig.path).each do |prefix| %>
+    <tr>
+      <td><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(prefix)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(prefix)) %></td>
+      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(prefix)) %></td>
+      <td/>
+    </tr>
+    <% end %>
+  </tbody>
+</table>
 
 <h3>Files</h3>
 <table>
+  <thead>
   <tr>
     <th>Key</th>
     <th>Size</th>
     <th>Last Modified</th>
   </tr>
+  </thead>
+  <tbody>
   <% iconfig.inventory.files(iconfig.path).each do |file| %>
   <tr>
     <td><%= file[:key] %></td>
@@ -60,6 +110,7 @@
     <td><%= file[:last_modified] %></td>
   </tr>
   <% end %>
+  </tbody>
 </table>
 
 <h3>Summary Stats</h3>
