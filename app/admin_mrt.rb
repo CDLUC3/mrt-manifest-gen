@@ -12,7 +12,7 @@ register Sinatra::Contrib
 
 get '/favicon.ico' do
   content_type 'image/x-icon'
-  File.open(File.join(settings.public_folder, 'favicon.ico'), 'rb').read
+  send_file File.join(settings.public_folder, 'favicon.ico'), :disposition => 'inline'
 end
 
 get '/*' do |path|
