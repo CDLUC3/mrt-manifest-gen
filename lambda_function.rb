@@ -97,7 +97,7 @@ module LambdaFunctions
           statusCode: status,
           headers: headers,
           body: is_base64_encoded ? Base64.strict_encode64(body_content) : body_content,
-          is_base64_encoded: is_base64_encoded
+          isBase64Encoded: is_base64_encoded
         }
       rescue StandardError => e
         # If there is _any_ exception, we return a 500 error with an error message
