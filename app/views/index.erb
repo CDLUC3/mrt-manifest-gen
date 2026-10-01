@@ -67,6 +67,9 @@
       <td>
         <form method="POST" action="/manifest">
           <input type="hidden" name="path" value="<%= iconfig.path %>">
+          <label for="preview">Preview:</label>
+          <input type="checkbox" name="preview" checked value="true" id="preview">
+          <label for="depth">Manifest Depth:</label>
           <select name="depth">
             <option value="">Object Manifest</option>
             <% if iconfig.inventory.path_depth(iconfig.path) > 0 %>

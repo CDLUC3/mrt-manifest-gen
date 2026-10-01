@@ -137,6 +137,25 @@ class Inventory
     files
   end
 
+  def descendant_files_by_depth(path, depth)
+    depth_map = {}
+    descendant_files(path).each do |file|
+      fname = path.empty? ? file[:key] : file[:key][path.length+1..]
+      parent = File.dirname(fname) == '.' ? '' : File.dirname(fname)
+      parentarr = parent.split('/')
+      if depth > 0 && parentarr.length >= depth
+        mapkey = parentarr[0..depth-1].join('/')
+      elsif depth < 0 && parentarr.length >= depth.abs
+        mapkey = parentarr[0..depth].join('/')
+      else
+        mapkey = 'OTHER'
+      end
+      depth_map[mapkey] ||= []
+      depth_map[mapkey] << file[:key]
+    end
+    depth_map
+  end
+
   def extensions(path)
     return {} unless @dirs.key?(path)
       
@@ -179,16 +198,47 @@ class Inventory
     max_depth 
   end
 
-  def checkm(depth = nil)
-    return object_checkm if depth.empty?
-    %(
-      Manifest Checkm
-      Path: #{@iconfig.path}
-      Depth: #{depth}
-    )
+  def checkm(depth = '', preview: true)
+    return checkm_preview(depth) if preview
+
+    "checkm..."
+  end
+
+  def checkm_preview(depth = '')
+    return object_checkm_preview if depth.empty?
+
+    arr = []
+    arr << "Manifest Checkm"
+    arr << "Path: #{@iconfig.path}"
+    arr << "Depth: #{depth}"
+    arr << ""
+
+    descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
+      arr << manifest_url(depth, mapkey)
+      files.each do |file|
+        arr << file_url(file)
+      end
+    end
+    arr.join("\n")
+  end
+
+  def file_url(file)
+    "  https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file)}"
+  end
+
+  def manifest_url(depth, mapkey)
+    url = "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" + 
+      "#{@iconfig.project}/manifests/" 
+    url += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
+    url += "depth_#{depth}/#{CGI.escape(mapkey)}"
+    url
   end
 
   def object_checkm
+    "object checkm..."
+  end
+
+  def object_checkm_preview
     arr = []
     arr << "Object Checkm"
     arr << "Path: #{@iconfig.path}"
