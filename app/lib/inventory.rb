@@ -129,6 +129,14 @@ class Inventory
     @dirs[path][:files]
   end
 
+  def descendant_files(path)
+    files = files(path)
+    prefixes(path).each do |prefix|
+      files += descendant_files(prefix)
+    end
+    files
+  end
+
   def extensions(path)
     return {} unless @dirs.key?(path)
       
@@ -171,5 +179,25 @@ class Inventory
     max_depth 
   end
 
-attr_reader :last_updated
+  def checkm(depth = nil)
+    return object_checkm if depth.empty?
+    %(
+      Manifest Checkm
+      Path: #{@iconfig.path}
+      Depth: #{depth}
+    )
+  end
+
+  def object_checkm
+    arr = []
+    arr << "Object Checkm"
+    arr << "Path: #{@iconfig.path}"
+    arr << ""
+    descendant_files(@iconfig.path).each do |file|
+      arr << "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file[:key])}"
+    end
+    arr.join("\n")
+  end
+
+  attr_reader :last_updated
 end

@@ -17,3 +17,11 @@ get '/*' do |path|
   )
   erb :index, locals: { iconfig: iconfig }
 end
+
+post '/manifest' do
+  iconfig = InventoryConfig.new(
+    path: params[:path]
+  )
+  content_type 'text/plain'
+  iconfig.inventory.checkm(params[:depth])
+end

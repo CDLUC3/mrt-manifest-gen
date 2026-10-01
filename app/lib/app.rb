@@ -22,6 +22,7 @@ class InventoryConfig
     @project = ENV.fetch('PROJECT_NAME', 'not-applicable')
     @mode = ENV.fetch('MANIFEST_MODE', 's3api')
     @prefix = ENV.fetch('MANIFEST_PREFIX', '')
+    @region = ENV.fetch('AWS_REGION', 'us-west-2')
     @source = ''
 
     @inventory = Inventory.new(self)
@@ -29,14 +30,16 @@ class InventoryConfig
 
     case @mode
     when 's3api'
-      bucket = ENV.fetch('MANIFEST_BUCKET', '')
-      @source = "s3://#{bucket}/#{@prefix}"
+      @bucket = ENV.fetch('MANIFEST_BUCKET', '')
+      @source = "s3://#{@bucket}/#{@prefix}"
       if reload_needed
         @inventory.reset
-        s3_reload(bucket, @prefix, path: path)
+        s3_reload(@bucket, @prefix, path: path)
       end
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
+      match = @source.match(%r{^https://([^\.]+)\.})
+      @bucket = match ? match[1] : ''
       if reload_needed
         @inventory.reset
         https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
@@ -147,5 +150,5 @@ class InventoryConfig
     parent == '.' ? '' : parent
   end
 
-  attr_reader :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project
+  attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project, :region
 end
