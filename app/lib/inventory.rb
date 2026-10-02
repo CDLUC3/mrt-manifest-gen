@@ -55,7 +55,7 @@ class Inventory
   end
 
   def file_init
-    %x[mkdir -p #{File.dirname(@filepath)}]
+    `mkdir -p #{File.dirname(@filepath)}`
     CSV.open(@filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
       csv << %w[key size last_modified]
     end
@@ -64,6 +64,7 @@ class Inventory
   def add(key, size, last_modified)
     return if key.nil?
     return if key.empty?
+
     # return unless key.start_with?(path)
 
     size = 0 if size.nil?
@@ -71,7 +72,7 @@ class Inventory
     parent_path = File.dirname(key) == '.' ? '' : File.dirname(key)
     ext = File.extname(key).downcase
 
-    @dirs[parent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
+    @dirs[parent_path] ||= { count: 0, bytes: 0, files: [], extensions: {}, prefixes: [] }
     @dirs[parent_path][:count] += 1
     @dirs[parent_path][:bytes] += size
     @dirs[parent_path][:extensions][ext] ||= { count: 0, bytes: 0 }
@@ -83,17 +84,17 @@ class Inventory
 
   def add_prefix(ppath)
     gparent_path = File.dirname(ppath) == '.' ? '' : File.dirname(ppath)
-    if gparent_path != ppath
-      @dirs[gparent_path] ||= { count: 0, bytes: 0, files:[], extensions: {}, prefixes: [] }
-      @dirs[gparent_path][:prefixes] << ppath unless @dirs[gparent_path][:prefixes].include?(ppath)
-      add_prefix(gparent_path)
-    end
+    return unless gparent_path != ppath
+
+    @dirs[gparent_path] ||= { count: 0, bytes: 0, files: [], extensions: {}, prefixes: [] }
+    @dirs[gparent_path][:prefixes] << ppath unless @dirs[gparent_path][:prefixes].include?(ppath)
+    add_prefix(gparent_path)
   end
 
   def save
     file_init
     CSV.open(@filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
-      @dirs.each do |path, dir_info|
+      @dirs.each do |_path, dir_info|
         dir_info[:files].each do |file_info|
           csv << [file_info[:key], file_info[:size], file_info[:last_modified]]
         end
@@ -121,7 +122,7 @@ class Inventory
       bucket: @iconfig.cache_bucket,
       key: key,
       body: body
-    )    
+    )
   end
 
   def self.format_int(vint)
@@ -131,7 +132,7 @@ class Inventory
   def count
     @dirs.values.sum { |dir| dir[:count] }
   end
-  
+
   def bytes
     @dirs.values.sum { |dir| dir[:bytes] }
   end
@@ -153,16 +154,16 @@ class Inventory
   def descendant_files_by_depth(path, depth)
     depth_map = {}
     descendant_files(path).each do |file|
-      fname = path.empty? ? file[:key] : file[:key][path.length+1..]
+      fname = path.empty? ? file[:key] : file[:key][path.length + 1..]
       parent = File.dirname(fname) == '.' ? '' : File.dirname(fname)
       parentarr = parent.split('/')
-      if depth > 0 && parentarr.length >= depth
-        mapkey = parentarr[0..depth-1].join('/')
-      elsif depth < 0 && parentarr.length >= depth.abs
-        mapkey = parentarr[0..depth].join('/')
-      else
-        mapkey = 'OTHER'
-      end
+      mapkey = if depth > 0 && parentarr.length >= depth
+                 parentarr[0..depth - 1].join('/')
+               elsif depth < 0 && parentarr.length >= depth.abs
+                 parentarr[0..depth].join('/')
+               else
+                 'OTHER'
+               end
       depth_map[mapkey] ||= []
       depth_map[mapkey] << file
     end
@@ -171,18 +172,18 @@ class Inventory
 
   def extensions(path)
     return {} unless @dirs.key?(path)
-      
+
     @dirs[path][:extensions]
   end
 
   def prefixes(path)
-    return [] unless @dirs.key?(path) 
-    
+    return [] unless @dirs.key?(path)
+
     @dirs[path][:prefixes]
   end
 
   def dirs(path)
-    return {} unless @dirs.key?(path) 
+    return {} unless @dirs.key?(path)
 
     @dirs[path]
   end
@@ -208,7 +209,7 @@ class Inventory
     prefixes(path).each do |prefix|
       max_depth = [max_depth, 1 + path_depth(prefix)].max
     end
-    max_depth 
+    max_depth
   end
 
   def checkm(depth = '', objectformat, preview: true)
@@ -218,14 +219,14 @@ class Inventory
     batch_buffer = StringIO.new
     batch_buffer.puts batch_checkm_header
 
-    CSV.generate(col_sep: "|", row_sep: "\n", force_quotes: false) do |csv|
+    CSV.generate(col_sep: '|', row_sep: "\n", force_quotes: false) do |csv|
       descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
         csv << [
           manifest_url(depth, mapkey),
           nil,
           nil,
           nil,
-          nil,  
+          nil,
           "#{File.basename(mapkey)}.checkm",
           nil,
           nil,
@@ -248,10 +249,10 @@ class Inventory
     return object_checkm_preview if depth.empty?
 
     buffer = StringIO.new
-    buffer.puts "Manifest Checkm"
+    buffer.puts 'Manifest Checkm'
     buffer.puts "Path: #{@iconfig.path}"
     buffer.puts "Depth: #{depth}"
-    buffer.puts ""
+    buffer.puts ''
 
     descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
       buffer.puts manifest_url(depth, mapkey)
@@ -267,14 +268,14 @@ class Inventory
   end
 
   def manifest_key(depth, mapkey)
-    key = "#{@iconfig.project}/manifests/" 
+    key = "#{@iconfig.project}/manifests/"
     key += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
     key += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
     key
   end
 
   def manifest_url(depth, mapkey)
-    "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" + 
+    "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" +
       manifest_key(depth, mapkey)
   end
 
@@ -303,36 +304,36 @@ class Inventory
   end
 
   def object_checkm(files, objectformat)
-    objmanifest = objectformat == "mrt-ingest-manifest"
+    objmanifest = objectformat == 'mrt-ingest-manifest'
     buffer = StringIO.new
     buffer.puts objmanifest ? object_checkm_header : single_file_checkm_header
-    CSV.generate(col_sep: "|", row_sep: "\n", force_quotes: false) do |csv|
+    CSV.generate(col_sep: '|', row_sep: "\n", force_quotes: false) do |csv|
       files.each do |file|
-        if objmanifest
-          csv << [
-            file_url(file[:key]),
-            nil,
-            nil,
-            file[:size],
-            file[:last_modified],
-            file[:key],
-            nil
-          ]
-        else
-          csv << [
-            file_url(file[:key]),
-            nil,
-            nil,
-            file[:size],
-            file[:last_modified],
-            file[:key],
-            nil,
-            nil,
-            nil,
-            nil,
-            nil
-          ]
-        end
+        csv << if objmanifest
+                 [
+                   file_url(file[:key]),
+                   nil,
+                   nil,
+                   file[:size],
+                   file[:last_modified],
+                   file[:key],
+                   nil
+                 ]
+               else
+                 [
+                   file_url(file[:key]),
+                   nil,
+                   nil,
+                   file[:size],
+                   file[:last_modified],
+                   file[:key],
+                   nil,
+                   nil,
+                   nil,
+                   nil,
+                   nil
+                 ]
+               end
       end
       buffer.puts csv.string
     end
@@ -342,9 +343,9 @@ class Inventory
 
   def object_checkm_preview
     buffer = StringIO.new
-    buffer.puts "Object Checkm"
+    buffer.puts 'Object Checkm'
     buffer.puts "Path: #{@iconfig.path}"
-    buffer.puts ""
+    buffer.puts ''
 
     descendant_files(@iconfig.path).each do |file|
       buffer.puts "  #{file_url(file[:key])}"

@@ -12,7 +12,7 @@ register Sinatra::Contrib
 
 get '/*' do |path|
   iconfig = InventoryConfig.new(
-    path: path, 
+    path: path,
     reload: request.params.fetch('reload', 'false') == 'true'
   )
   erb :index, locals: { iconfig: iconfig }
@@ -24,7 +24,7 @@ post '/manifest' do
     path: params[:path]
   )
   manifest = iconfig.inventory.checkm(
-    params[:depth], 
+    params[:depth],
     params[:objectformat],
     preview: preview
   )
@@ -34,8 +34,8 @@ post '/manifest' do
     return manifest
   end
 
-  erb :manifest, locals: { 
-    iconfig: iconfig, 
+  erb :manifest, locals: {
+    iconfig: iconfig,
     manifest: manifest,
     name: iconfig.batch_manifest_path
   }

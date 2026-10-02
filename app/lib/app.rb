@@ -38,13 +38,13 @@ class InventoryConfig
       end
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
-      match = @source.match(%r{^https://([^\.]+)\.})
+      match = @source.match(%r{^https://([^.]+)\.})
       @bucket = match ? match[1] : ''
       if reload_needed
         @inventory.reset
         https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
       end
-    
+
     # Not yet implemented
     when 'inventoryfile'
       @file = ENV.fetch('MANIFEST_FILE', '')
@@ -85,7 +85,7 @@ class InventoryConfig
     response = Net::HTTP.get_response(uri)
     raise "Failed to fetch #{uri}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
-    %x[mkdir -p /tmp/inventory]
+    `mkdir -p /tmp/inventory`
     File.write(localfile, response.body)
   end
 
@@ -156,5 +156,6 @@ class InventoryConfig
     "#{@project}_manifest_#{@path.gsub('/', '_')}.checkm"
   end
 
-  attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project, :region
+  attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project,
+    :region
 end
