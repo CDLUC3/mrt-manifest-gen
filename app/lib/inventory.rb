@@ -4,6 +4,7 @@ require 'aws-sdk-s3'
 require 'csv'
 require 'net/http'
 require 'uri'
+require 'stringio'
 
 ## Track inventory statistics for the portion of the inventory being analyzed
 class Inventory
@@ -151,7 +152,7 @@ class Inventory
         mapkey = 'OTHER'
       end
       depth_map[mapkey] ||= []
-      depth_map[mapkey] << file[:key]
+      depth_map[mapkey] << file
     end
     depth_map
   end
@@ -200,53 +201,124 @@ class Inventory
 
   def checkm(depth = '', preview: true)
     return checkm_preview(depth) if preview
+    return object_checkm(descendant_files(@iconfig.path)) if depth.empty?
 
-    "checkm..."
+    batch_buffer = StringIO.new
+    object_buffer = StringIO.new
+    batch_buffer.puts batch_checkm_header
+
+    CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
+      descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
+        csv << [
+          manifest_url(depth, mapkey),
+          '',
+          '',
+          '',
+          '',
+          "#{File.basename(mapkey)}.checkm",
+          '',
+          '',
+          '',
+          '',
+          ''
+        ]
+        object_buffer.puts object_checkm(files)
+        object_buffer.puts ""
+      end
+      batch_buffer.puts csv.string
+    end
+
+    batch_buffer.puts %(#%eof)
+    batch_buffer.puts ""
+    batch_buffer.puts object_buffer.string
+    batch_buffer.string
   end
 
   def checkm_preview(depth = '')
     return object_checkm_preview if depth.empty?
 
-    arr = []
-    arr << "Manifest Checkm"
-    arr << "Path: #{@iconfig.path}"
-    arr << "Depth: #{depth}"
-    arr << ""
+    buffer = StringIO.new
+    buffer.puts "Manifest Checkm"
+    buffer.puts "Path: #{@iconfig.path}"
+    buffer.puts "Depth: #{depth}"
+    buffer.puts ""
 
     descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
-      arr << manifest_url(depth, mapkey)
+      buffer.puts manifest_url(depth, mapkey)
       files.each do |file|
-        arr << file_url(file)
+        buffer.puts file_url(file)
       end
     end
-    arr.join("\n")
+    buffer.string
   end
 
   def file_url(file)
-    "  https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file)}"
+    "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file)}"
   end
 
   def manifest_url(depth, mapkey)
     url = "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" + 
       "#{@iconfig.project}/manifests/" 
     url += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
-    url += "depth_#{depth}/#{CGI.escape(mapkey)}"
+    url += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
     url
   end
 
-  def object_checkm
-    "object checkm..."
+  def object_checkm_header
+    %(#%checkm_0.7
+#%profile | http://uc3.cdlib.org/registry/ingest/manifest/mrt-ingest-manifest
+#%prefix | mrt: | http://merritt.cdlib.org/terms#
+#%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
+#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:mimeType)
+  end
+
+  def single_file_checkm_header
+    %(#%checkm_0.7
+#%profile | http://uc3.cdlib.org/registry/ingest/manifest/mrt-single-file-batch-manifest
+#%prefix | mrt: | http://merritt.cdlib.org/terms#
+#%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
+#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date)
+  end
+
+  def batch_checkm_header
+    %(#%checkm_0.7
+#%profile | http://uc3.cdlib.org/registry/ingest/manifest/mrt-batch-manifest
+#%prefix | mrt: | http://merritt.cdlib.org/terms#
+#%prefix | nfo: | http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#
+#%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date)
+  end
+
+  def object_checkm(files)
+    buffer = StringIO.new
+    buffer.puts object_checkm_header
+    CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
+      files.each do |file|
+        csv << [
+          file_url(file[:key]),
+          '',
+          '',
+          file[:size],
+          file[:last_modified],
+          file[:key],
+          ''
+        ]
+      end
+      buffer.puts csv.string
+    end
+    buffer.puts %(#%eof)
+    buffer.string
   end
 
   def object_checkm_preview
-    arr = []
-    arr << "Object Checkm"
-    arr << "Path: #{@iconfig.path}"
-    arr << ""
+    buffer = StringIO.new
+    buffer.puts "Object Checkm"
+    buffer.puts "Path: #{@iconfig.path}"
+    buffer.puts ""
+
     descendant_files(@iconfig.path).each do |file|
-      arr << "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file[:key])}"
+      buffer.puts "  #{file_url(file[:key])}"
     end
-    arr.join("\n")
+    buffer.string
   end
 
   attr_reader :last_updated
