@@ -150,10 +150,10 @@ class InventoryConfig
     parent == '.' ? '' : parent
   end
 
-  def manifest_path
-    return '/manifest/manifest.checkm' if @path.empty?
+  def batch_manifest_path
+    return "#{@project}_manifest.checkm" if @path.empty?
 
-    "/manifest/#{@path.gsub('/', '_')}.checkm"
+    "#{@project}_manifest_#{@path.gsub('/', '_')}.checkm"
   end
 
   attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project, :region

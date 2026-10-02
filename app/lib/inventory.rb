@@ -218,20 +218,20 @@ class Inventory
     batch_buffer = StringIO.new
     batch_buffer.puts batch_checkm_header
 
-    CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
+    CSV.generate(col_sep: "|", row_sep: "\n", force_quotes: false) do |csv|
       descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
         csv << [
           manifest_url(depth, mapkey),
-          '',
-          '',
-          '',
-          '',
+          nil,
+          nil,
+          nil,
+          nil,  
           "#{File.basename(mapkey)}.checkm",
-          '',
-          '',
-          '',
-          '',
-          ''
+          nil,
+          nil,
+          nil,
+          nil,
+          nil
         ]
         object_buffer = StringIO.new
         object_buffer.puts object_checkm(files, objectformat)
@@ -306,31 +306,31 @@ class Inventory
     objmanifest = objectformat == "mrt-ingest-manifest"
     buffer = StringIO.new
     buffer.puts objmanifest ? object_checkm_header : single_file_checkm_header
-    CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
+    CSV.generate(col_sep: "|", row_sep: "\n", force_quotes: false) do |csv|
       files.each do |file|
         if objmanifest
           csv << [
             file_url(file[:key]),
-            '',
-            '',
+            nil,
+            nil,
             file[:size],
             file[:last_modified],
             file[:key],
-            ''
+            nil
           ]
         else
           csv << [
             file_url(file[:key]),
-            '',
-            '',
+            nil,
+            nil,
             file[:size],
             file[:last_modified],
             file[:key],
-            '',
-            '',
-            '',
-            '',
-            ''
+            nil,
+            nil,
+            nil,
+            nil,
+            nil
           ]
         end
       end
@@ -350,6 +350,17 @@ class Inventory
       buffer.puts "  #{file_url(file[:key])}"
     end
     buffer.string
+  end
+
+  def cache_retrieve(key)
+    s3_client = Aws::S3::Client.new(
+      region: ENV.fetch('AWS_REGION', 'us-west-2')
+    )
+    obj = s3_client.get_object(
+      bucket: @iconfig.cache_bucket,
+      key: key
+    )
+    obj.body.read
   end
 
   attr_reader :last_updated

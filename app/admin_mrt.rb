@@ -18,14 +18,31 @@ get '/*' do |path|
   erb :index, locals: { iconfig: iconfig }
 end
 
-post '/manifest/*.checkm' do
+post '/manifest' do
+  preview = params.fetch('preview', 'false') == 'true'
   iconfig = InventoryConfig.new(
     path: params[:path]
   )
-  content_type 'text/plain'
-  iconfig.inventory.checkm(
+  manifest = iconfig.inventory.checkm(
     params[:depth], 
     params[:objectformat],
-    preview: params.fetch('preview', 'false') == 'true'
+    preview: preview
   )
+
+  if preview
+    content_type 'text/plain'
+    return manifest
+  end
+
+  erb :manifest, locals: { 
+    iconfig: iconfig, 
+    manifest: manifest,
+    name: iconfig.batch_manifest_path
+  }
+end
+
+post '/download-manifest' do
+  content_type 'text/plain'
+  attachment params[:name]
+  params[:contents].to_s
 end

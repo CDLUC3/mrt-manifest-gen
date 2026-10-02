@@ -1,0 +1,26 @@
+<html>
+<head>
+  <title>Generated Manifest</title>
+  <link rel="stylesheet" href="/wkspace.css">
+  <link rel="icon" href="/favicon.ico" />
+</head>
+<body>
+<h1>Generated Manifest</h1>
+<div>
+  Return to <a href="/<%= iconfig.path %>">Inventory</a>
+</div>
+<div>
+<fieldset>
+<legend>Generated Manifest</legend>
+<form action="/download-manifest?name=<%= name %>" method="post">
+  <div>
+  <textarea name="contents" rows="30" cols="160"><%= manifest %></textarea>
+  </div>
+  <div>
+  <button type="submit">Save manfiest as <%= name %></button>
+  </div>
+</form>
+</fieldset>
+</div>
+</body>
+</html>
