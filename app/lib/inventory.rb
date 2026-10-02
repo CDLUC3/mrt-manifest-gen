@@ -269,14 +269,17 @@ class Inventory
 
   def manifest_key(depth, mapkey)
     key = "#{@iconfig.project}/manifests/"
-    key += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
-    key += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
+    key += "#{@iconfig.path}/" unless @iconfig.path.empty?
+    key += "depth_#{depth}/#{mapkey}.checkm"
     key
   end
 
   def manifest_url(depth, mapkey)
-    "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" +
-      manifest_key(depth, mapkey)
+    manifest = "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" \
+               "#{@iconfig.project}/manifests/"
+    manifest += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
+    manifest += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
+    manifest
   end
 
   def object_checkm_header
