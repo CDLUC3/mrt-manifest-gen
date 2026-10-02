@@ -65,13 +65,17 @@
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(iconfig.path)) %></td>
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.path)) %></td>
       <td>
+        <div align="center">
         <form method="POST" action="/manifest">
           <input type="hidden" name="path" value="<%= iconfig.path %>">
+          <div>
           <label for="preview">Preview:</label>
           <input type="checkbox" name="preview" checked value="true" id="preview">
+          </div>
+          <div>
           <label for="depth">Manifest Depth:</label>
           <select name="depth">
-            <option value="">Object Manifest</option>
+            <option value="">No Batch</option>
             <% if iconfig.inventory.path_depth(iconfig.path) > 0 %>
               <option value="1">Depth 1</option>
             <% end %>
@@ -80,8 +84,17 @@
               <option value="<%= -(i-1) %>">Depth <%= -(i-1) %></option>
             <% end %>
           </select>
+          <div>
+          <label for="objectformat">Object Manifest Type:</label>
+            <input type="radio" name="objectformat" checked value="mrt-ingest-manifest">One Object</input>
+            <input type="radio" name="objectformat" value="mrt-single-file-batch-manifest">One Object Per File</input>  
+          </div>
+          </div>
+          <div>
           <input type="submit" value="Make Manifest">
+          </div>
         </form>
+        </div>
       </td>
     </tr>
     <% iconfig.inventory.prefixes(iconfig.path).each do |prefix| %>

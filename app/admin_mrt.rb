@@ -23,5 +23,9 @@ post '/manifest' do
     path: params[:path]
   )
   content_type 'text/plain'
-  iconfig.inventory.checkm(params[:depth], preview: params.fetch('preview', 'false') == 'true')
+  iconfig.inventory.checkm(
+    params[:depth], 
+    params[:objectformat],
+    preview: params.fetch('preview', 'false') == 'true'
+  )
 end

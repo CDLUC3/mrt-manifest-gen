@@ -199,9 +199,9 @@ class Inventory
     max_depth 
   end
 
-  def checkm(depth = '', preview: true)
+  def checkm(depth = '', objectformat, preview: true)
     return checkm_preview(depth) if preview
-    return object_checkm(descendant_files(@iconfig.path)) if depth.empty?
+    return object_checkm(descendant_files(@iconfig.path), objectformat) if depth.empty?
 
     batch_buffer = StringIO.new
     object_buffer = StringIO.new
@@ -222,7 +222,7 @@ class Inventory
           '',
           ''
         ]
-        object_buffer.puts object_checkm(files)
+        object_buffer.puts object_checkm(files, objectformat)
         object_buffer.puts ""
       end
       batch_buffer.puts csv.string
@@ -246,7 +246,7 @@ class Inventory
     descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
       buffer.puts manifest_url(depth, mapkey)
       files.each do |file|
-        buffer.puts file_url(file)
+        buffer.puts "  #{file_url(file[:key])}"
       end
     end
     buffer.string
@@ -288,20 +288,37 @@ class Inventory
 #%fields | nfo:fileUrl | nfo:hashAlgorithm | nfo:hashValue | nfo:fileSize | nfo:fileLastModified | nfo:fileName | mrt:primaryIdentifier | mrt:localIdentifier | mrt:creator | mrt:title | mrt:date)
   end
 
-  def object_checkm(files)
+  def object_checkm(files, objectformat)
+    objmanifest = objectformat == "mrt-ingest-manifest"
     buffer = StringIO.new
-    buffer.puts object_checkm_header
+    buffer.puts objmanifest ? object_checkm_header : single_file_checkm_header
     CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
       files.each do |file|
-        csv << [
-          file_url(file[:key]),
-          '',
-          '',
-          file[:size],
-          file[:last_modified],
-          file[:key],
-          ''
-        ]
+        if objmanifest
+          csv << [
+            file_url(file[:key]),
+            '',
+            '',
+            file[:size],
+            file[:last_modified],
+            file[:key],
+            ''
+          ]
+        else
+          csv << [
+            file_url(file[:key]),
+            '',
+            '',
+            file[:size],
+            file[:last_modified],
+            file[:key],
+            '',
+            '',
+            '',
+            '',
+            ''
+          ]
+        end
       end
       buffer.puts csv.string
     end
