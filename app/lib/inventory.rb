@@ -100,6 +100,7 @@ class Inventory
       end
     end
     unless @iconfig.cache_bucket.empty?
+      save_object("#{@iconfig.project}/inventory/inventory-file.csv", File.read(@filepath))
       s3_client = Aws::S3::Client.new(
         region: ENV.fetch('AWS_REGION', 'us-west-2')
       )
@@ -110,6 +111,17 @@ class Inventory
       )
     end
     @last_updated = File.mtime(@filepath)
+  end
+
+  def save_object(key, body)
+    s3_client = Aws::S3::Client.new(
+      region: ENV.fetch('AWS_REGION', 'us-west-2')
+    )
+    s3_client.put_object(
+      bucket: @iconfig.cache_bucket,
+      key: key,
+      body: body
+    )    
   end
 
   def self.format_int(vint)
@@ -204,7 +216,6 @@ class Inventory
     return object_checkm(descendant_files(@iconfig.path), objectformat) if depth.empty?
 
     batch_buffer = StringIO.new
-    object_buffer = StringIO.new
     batch_buffer.puts batch_checkm_header
 
     CSV.generate(col_sep: "|", row_sep: "\n") do |csv|
@@ -222,15 +233,14 @@ class Inventory
           '',
           ''
         ]
+        object_buffer = StringIO.new
         object_buffer.puts object_checkm(files, objectformat)
-        object_buffer.puts ""
+        save_object(manifest_key(depth, mapkey), object_buffer.string)
       end
       batch_buffer.puts csv.string
     end
 
     batch_buffer.puts %(#%eof)
-    batch_buffer.puts ""
-    batch_buffer.puts object_buffer.string
     batch_buffer.string
   end
 
@@ -256,12 +266,16 @@ class Inventory
     "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file)}"
   end
 
+  def manifest_key(depth, mapkey)
+    key = "#{@iconfig.project}/manifests/" 
+    key += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
+    key += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
+    key
+  end
+
   def manifest_url(depth, mapkey)
-    url = "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" + 
-      "#{@iconfig.project}/manifests/" 
-    url += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
-    url += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
-    url
+    "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" + 
+      manifest_key(depth, mapkey)
   end
 
   def object_checkm_header

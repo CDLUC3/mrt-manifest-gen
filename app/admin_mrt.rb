@@ -18,7 +18,7 @@ get '/*' do |path|
   erb :index, locals: { iconfig: iconfig }
 end
 
-post '/manifest' do
+post '/manifest/*.checkm' do
   iconfig = InventoryConfig.new(
     path: params[:path]
   )
