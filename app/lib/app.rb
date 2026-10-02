@@ -140,7 +140,7 @@ class InventoryConfig
     parent = File.dirname(@path)
     return top_path if parent == '.'
 
-    "/#{parent}"
+    parent
   end
 
   def parent_name

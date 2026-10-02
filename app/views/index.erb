@@ -50,7 +50,7 @@
       <td/>
     </tr>
     <% end %>
-    <% unless iconfig.parent_path.empty? %>
+    <% unless iconfig.parent_path.empty? || iconfig.parent_path == '/' %>
     <tr>
       <td><a href="/<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></td>
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(iconfig.parent_path)) %></td>
