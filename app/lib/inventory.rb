@@ -44,7 +44,7 @@ class Inventory
     end
   end
 
-  def load_csv(path: '')
+  def load_csv
     reset
     CSV.parse(get_csv, headers: true, col_sep: "\t", row_sep: "\n") do |row|
       key = row['key']
@@ -94,7 +94,7 @@ class Inventory
   def save
     file_init
     CSV.open(@filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
-      @dirs.each do |_path, dir_info|
+      @dirs.each_value do |dir_info|
         dir_info[:files].each do |file_info|
           csv << [file_info[:key], file_info[:size], file_info[:last_modified]]
         end
@@ -154,12 +154,12 @@ class Inventory
   def descendant_files_by_depth(path, depth)
     depth_map = {}
     descendant_files(path).each do |file|
-      fname = path.empty? ? file[:key] : file[:key][path.length + 1..]
+      fname = path.empty? ? file[:key] : file[:key][(path.length + 1)..]
       parent = File.dirname(fname) == '.' ? '' : File.dirname(fname)
       parentarr = parent.split('/')
-      mapkey = if depth > 0 && parentarr.length >= depth
-                 parentarr[0..depth - 1].join('/')
-               elsif depth < 0 && parentarr.length >= depth.abs
+      mapkey = if depth.positive? && parentarr.length >= depth
+                 parentarr[0..(depth - 1)].join('/')
+               elsif depth.negative? && parentarr.length >= depth.abs
                  parentarr[0..depth].join('/')
                else
                  'OTHER'
@@ -212,7 +212,7 @@ class Inventory
     max_depth
   end
 
-  def checkm(depth = '', objectformat, preview: true)
+  def checkm(depth, objectformat, preview: true)
     return checkm_preview(depth) if preview
     return object_checkm(descendant_files(@iconfig.path), objectformat) if depth.empty?
 

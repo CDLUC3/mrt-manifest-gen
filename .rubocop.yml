@@ -61,3 +61,7 @@ Naming/PredicateMethod:
   Enabled: false
 Lint/DuplicateBranch:
   Enabled: false
+Style/CollectionQuerying:
+  Enabled: false
+Layout/LineLength:
+  Enabled: false

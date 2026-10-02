@@ -34,7 +34,7 @@ class InventoryConfig
       @source = "s3://#{@bucket}/#{@prefix}"
       if reload_needed
         @inventory.reset
-        s3_reload(@bucket, @prefix, path: path)
+        s3_reload(@bucket, @prefix)
       end
     when 'httpsapi'
       @source = ENV.fetch('MANIFEST_BUCKET', '')
@@ -54,9 +54,9 @@ class InventoryConfig
       @source = @url
       if reload_needed
         @inventory.reset
-        url_reload(@url, INVENTORY_FILE, path: path)
+        url_reload(@url, INVENTORY_FILE)
       end
-      @inventory.load_from_csv(path: path)
+      @inventory.load_from_csv
     end
   end
 
@@ -72,13 +72,14 @@ class InventoryConfig
       last_modified = content.xpath('LastModified').text
       @inventory.add(key, size, last_modified)
     end
-    doc.xpath('//NextContinuationToken').each do |token|
+    doc.xpath('//NextContinuationToken') do |token|
       return https_reload(url, token.text)
     end
     @inventory.save
   end
 
-  def url_reload(url, localfile, path: '')
+  # Add path param to perform partial reload
+  def url_reload(url, localfile)
     uri = URI.parse(url)
     raise ArgumentError, "Unsupported URL scheme: #{uri.scheme}" unless %w[http https].include?(uri.scheme)
 
@@ -89,7 +90,8 @@ class InventoryConfig
     File.write(localfile, response.body)
   end
 
-  def s3_reload(bucket, prefix, path: '')
+  # Add path param to perform partial reload
+  def s3_reload(bucket, prefix)
     s3_client = Aws::S3::Client.new(
       region: ENV.fetch('AWS_REGION', 'us-west-2')
     )
@@ -143,11 +145,6 @@ class InventoryConfig
 
   def parent_name
     @path.empty? ? top_name : '.. (parent)'
-  end
-
-  def parent_path
-    parent = File.dirname(@path)
-    parent == '.' ? '' : parent
   end
 
   def batch_manifest_path
