@@ -67,7 +67,7 @@ class InventoryConfig
     url_reload(turl, INVENTORY_XML)
     @inventory.file_init
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
-    puts doc.text
+    puts doc
     doc.xpath('//Contents').each do |content|
       key = content.xpath('Key').text
       size = content.xpath('Size').text.to_i
