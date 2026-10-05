@@ -67,14 +67,13 @@ class InventoryConfig
     url_reload(turl, INVENTORY_XML)
     @inventory.file_init
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
-    puts doc
     doc.xpath('//Contents').each do |content|
       key = content.xpath('Key').text
       size = content.xpath('Size').text.to_i
       last_modified = content.xpath('LastModified').text
       @inventory.add(key, size, last_modified)
     end
-    doc.xpath('//NextContinuationToken') do |token|
+    doc.xpath('//NextContinuationToken').first do |token|
       puts "NextContinuationToken: #{token.text}"
       return https_reload(url, token.text)
     end
