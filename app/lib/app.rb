@@ -76,7 +76,7 @@ class InventoryConfig
     doc.xpath('//NextContinuationToken') do |token|
       return https_reload(url, token.text)
     end
-    puts "Saving inventory to #{@inventory.file}"
+    puts "Saving inventory"
     @inventory.save
   end
 
