@@ -73,11 +73,14 @@ class InventoryConfig
       last_modified = content.xpath('LastModified').text
       @inventory.add(key, size, last_modified)
     end
-    doc.xpath('//NextContinuationToken').first do |token|
-      puts "NextContinuationToken: #{token.text}"
-      return https_reload(url, token.text)
+    token = ''
+    doc.xpath('//NextContinuationToken').each do |nct|
+      token = nct.text
+      puts "NextContinuationToken: #{token}"
     end
-    puts "Saving inventory"
+    return https_reload(url, token) unless token.empty?
+
+    puts 'Saving inventory'
     @inventory.save
   end
 
