@@ -42,7 +42,7 @@ class InventoryConfig
       @bucket = match ? match[1] : ''
       if reload_needed
         @inventory.reset
-        https_reload("#{@source}/?list-type=2&max-keys=#{MAXKEYS}")
+        https_reload("#{@source}/?list-type=2")
       end
 
     # Not yet implemented
@@ -62,6 +62,7 @@ class InventoryConfig
 
   def https_reload(url, token = '')
     turl = url.dup
+    turl += "&max-keys=#{MAXKEYS}"
     turl += "&continuation-token=#{CGI.escape(token)}" unless token.empty?
     url_reload(turl, INVENTORY_XML)
     @inventory.file_init
@@ -75,6 +76,7 @@ class InventoryConfig
     doc.xpath('//NextContinuationToken') do |token|
       return https_reload(url, token.text)
     end
+    puts "Saving inventory to #{@inventory.file}"
     @inventory.save
   end
 
