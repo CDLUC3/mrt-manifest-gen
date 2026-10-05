@@ -12,7 +12,7 @@ require_relative 'inventory'
 class InventoryConfig
   INVENTORY_FILE = '/tmp/inventory/inventory-file.csv'
   INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
-  MAXKEYS = 25
+  MAXKEYS = 500
 
   def initialize(path: '', reload: false)
     @path = path
@@ -76,11 +76,9 @@ class InventoryConfig
     token = ''
     doc.xpath('//NextContinuationToken').each do |nct|
       token = nct.text
-      puts "NextContinuationToken: #{token}"
     end
     return https_reload(url, token) unless token.empty?
 
-    puts 'Saving inventory'
     @inventory.save
   end
 
