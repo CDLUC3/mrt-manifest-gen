@@ -8,10 +8,17 @@ require 'stringio'
 
 ## Track inventory statistics for the portion of the inventory being analyzed
 class Inventory
+  CACHE_MANIFEST = 'manifests'
+  CACHE_INVENTORY = 'inventory'
+  CACHE_INVENTORY_FILE = 'inventory-file.csv'
+  CACHE_METADATA = 'metadata'
+  CACHE_METADATA_FILE = 'metadata-file.csv'
+
   def initialize(iconfig)
-    @filepath = InventoryConfig::INVENTORY_FILE
+    @filepath = InventoryConfig::INVENTORY_LOCALFILE
     @iconfig = iconfig
     @last_updated = nil
+    @metadata = {}
     reset
   end
 
@@ -20,9 +27,19 @@ class Inventory
     @prefixes = []
   end
 
-  def get_csv
+  def metadata_record
+    {
+      primary_identifier: nil,
+      local_identifier: nil,
+      title: nil,
+      creator: nil,
+      date: nil
+    }
+  end
+
+  def get_inventory_csv
     if @iconfig.cache_bucket.empty?
-      file_init unless File.exist?(@filepath)
+      inventory_file_init unless File.exist?(@filepath)
       @last_updated = File.mtime(@filepath)
       File.read(@filepath)
     else
@@ -32,21 +49,42 @@ class Inventory
         )
         obj = s3_client.get_object(
           bucket: @iconfig.cache_bucket,
-          key: "#{@iconfig.project}/inventory/inventory-file.csv"
+          key: "#{@iconfig.project}/#{CACHE_INVENTORY}/#{CACHE_INVENTORY_FILE}"
         )
         @last_updated = obj.last_modified
         obj.body.read
       rescue Aws::S3::Errors::NoSuchKey
-        file_init
+        inventory_file_init
         @last_updated = File.mtime(@filepath)
         File.read(@filepath)
       end
     end
   end
 
-  def load_csv
+  def get_metadata_csv
+    if @iconfig.cache_bucket.empty?
+      metadata_file_init unless File.exist?(InventoryConfig::METADATA_LOCALFILE)
+      File.read(InventoryConfig::METADATA_LOCALFILE)
+    else
+      begin
+        s3_client = Aws::S3::Client.new(
+          region: ENV.fetch('AWS_REGION', 'us-west-2')
+        )
+        obj = s3_client.get_object(
+          bucket: @iconfig.cache_bucket,
+          key: "#{@iconfig.project}/#{CACHE_METADATA}/#{CACHE_METADATA_FILE}"
+        )
+        obj.body.read
+      rescue Aws::S3::Errors::NoSuchKey
+        metadata_file_init
+        File.read(InventoryConfig::METADATA_LOCALFILE)
+      end
+    end
+  end
+
+  def load_inventory_csv
     reset
-    CSV.parse(get_csv, headers: true, col_sep: "\t", row_sep: "\n") do |row|
+    CSV.parse(get_inventory_csv, headers: true, col_sep: "\t", row_sep: "\n") do |row|
       key = row['key']
       size = row['size'].to_i
       last_modified = row['last_modified']
@@ -54,10 +92,31 @@ class Inventory
     end
   end
 
-  def file_init
+  def load_metadata_csv
+    @metadata = {}
+    CSV.parse(get_metadata_csv, headers: true, col_sep: ',', row_sep: "\n") do |row|
+      key = row['key']
+      @metadata[key] = {
+        primary_identifier: row['primary_identifier'],
+        local_identifier: row['local_identifier'],
+        creator: row['creator'],
+        title: row['title'],
+        date: row['date']
+      }
+    end
+  end
+
+  def inventory_file_init
     `mkdir -p #{File.dirname(@filepath)}`
     CSV.open(@filepath, 'w', col_sep: "\t", row_sep: "\n") do |csv|
       csv << %w[key size last_modified]
+    end
+  end
+
+  def metadata_file_init
+    `mkdir -p #{File.dirname(InventoryConfig::METADATA_LOCALFILE)}`
+    CSV.open(InventoryConfig::METADATA_LOCALFILE, 'w', col_sep: ',', row_sep: "\n") do |csv|
+      csv << %w[key primary_identifier local_identifier creator title date]
     end
   end
 
@@ -91,8 +150,8 @@ class Inventory
     add_prefix(gparent_path)
   end
 
-  def save
-    file_init
+  def save_inventory
+    inventory_file_init
     CSV.open(@filepath, 'a', col_sep: "\t", row_sep: "\n") do |csv|
       @dirs.each_value do |dir_info|
         dir_info[:files].each do |file_info|
@@ -101,17 +160,34 @@ class Inventory
       end
     end
     unless @iconfig.cache_bucket.empty?
-      save_object("#{@iconfig.project}/inventory/inventory-file.csv", File.read(@filepath))
-      s3_client = Aws::S3::Client.new(
-        region: ENV.fetch('AWS_REGION', 'us-west-2')
-      )
-      s3_client.put_object(
-        bucket: @iconfig.cache_bucket,
-        key: "#{@iconfig.project}/inventory/inventory-file.csv",
-        body: File.read(@filepath)
+      save_object(
+        "#{@iconfig.project}/#{CACHE_INVENTORY}/#{CACHE_INVENTORY_FILE}",
+        File.read(@filepath)
       )
     end
     @last_updated = File.mtime(@filepath)
+  end
+
+  def save_metadata
+    metadata_file_init
+    CSV.open(InventoryConfig::METADATA_LOCALFILE, 'a', col_sep: ',', row_sep: "\n") do |csv|
+      @metadata.each do |key, meta_info|
+        csv << [
+          key,
+          meta_info[:primary_identifier],
+          meta_info[:local_identifier],
+          meta_info[:title],
+          meta_info[:creator],
+          meta_info[:date]
+        ]
+      end
+    end
+    return if @iconfig.cache_bucket.empty?
+
+    save_object(
+      "#{@iconfig.project}/#{CACHE_METADATA}/#{CACHE_METADATA_FILE}",
+      File.read(InventoryConfig::METADATA_LOCALFILE)
+    )
   end
 
   def save_object(key, body)
@@ -221,6 +297,8 @@ class Inventory
 
     CSV.generate(col_sep: '|', row_sep: "\n", force_quotes: false) do |csv|
       descendant_files_by_depth(@iconfig.path, depth.to_i).each do |mapkey, files|
+        mkey = manifest_key(depth, mapkey)
+        @metadata[mkey] ||= metadata_record
         csv << [
           manifest_url(depth, mapkey),
           nil,
@@ -228,11 +306,11 @@ class Inventory
           nil,
           nil,
           "#{File.basename(mapkey)}.checkm",
-          nil,
-          nil,
-          nil,
-          nil,
-          nil
+          @metadata[mkey][:primary_identifier],
+          @metadata[mkey][:local_identifier],
+          @metadata[mkey][:creator],
+          @metadata[mkey][:title],
+          @metadata[mkey][:date]
         ]
         object_buffer = StringIO.new
         object_buffer.puts object_checkm(files, objectformat)
@@ -241,6 +319,7 @@ class Inventory
       batch_buffer.puts csv.string
     end
 
+    save_metadata
     batch_buffer.puts %(#%eof)
     batch_buffer.string
   end
@@ -264,21 +343,25 @@ class Inventory
   end
 
   def file_url(file)
-    "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{CGI.escape(file)}"
+    "https://#{@iconfig.bucket}.s3.#{@iconfig.region}.amazonaws.com/#{pathencode(file)}"
   end
 
-  def manifest_key(depth, mapkey)
-    key = "#{@iconfig.project}/manifests/"
-    key += "#{@iconfig.path}/" unless @iconfig.path.empty?
-    key += "depth_#{depth}/#{mapkey}.checkm"
+  def manifest_key(_depth, mapkey)
+    key = "#{@iconfig.project}/#{CACHE_MANIFEST}/"
+    key += "#{pathencode(@iconfig.path)}/" unless @iconfig.path.empty?
+    key += "#{pathencode(mapkey)}.checkm"
     key
   end
 
-  def manifest_url(depth, mapkey)
+  def pathencode(path)
+    path.split('/').map { |s| CGI.escape(s) }.join('/')
+  end
+
+  def manifest_url(_depth, mapkey)
     manifest = "https://#{@iconfig.cache_bucket}.s3.us-west-2.amazonaws.com/" \
-               "#{@iconfig.project}/manifests/"
-    manifest += "#{CGI.escape(@iconfig.path)}/" unless @iconfig.path.empty?
-    manifest += "depth_#{depth}/#{CGI.escape(mapkey)}.checkm"
+               "#{@iconfig.project}/#{CACHE_MANIFEST}/"
+    manifest += "#{pathencode(@iconfig.path)}/" unless @iconfig.path.empty?
+    manifest += "#{pathencode(mapkey)}.checkm"
     manifest
   end
 
@@ -309,37 +392,44 @@ class Inventory
   def object_checkm(files, objectformat)
     objmanifest = objectformat == 'mrt-ingest-manifest'
     buffer = StringIO.new
-    buffer.puts objmanifest ? object_checkm_header : single_file_checkm_header
+    if objmanifest
+      buffer.puts object_checkm_header
+      @metadata[@iconfig.path] ||= metadata_record
+    else
+      buffer.puts single_file_checkm_header
+    end
     CSV.generate(col_sep: '|', row_sep: "\n", force_quotes: false) do |csv|
       files.each do |file|
-        csv << if objmanifest
-                 [
-                   file_url(file[:key]),
-                   nil,
-                   nil,
-                   file[:size],
-                   file[:last_modified],
-                   file[:key],
-                   nil
+        if objmanifest
+          csv << [
+            file_url(file[:key]),
+            nil,
+            nil,
+            file[:size],
+            file[:last_modified],
+            file[:key],
+            nil
                  ]
-               else
-                 [
-                   file_url(file[:key]),
-                   nil,
-                   nil,
-                   file[:size],
-                   file[:last_modified],
-                   file[:key],
-                   nil,
-                   nil,
-                   nil,
-                   nil,
-                   nil
+        else
+          @metadata[file[:key]] ||= metadata_record
+          csv << [
+            file_url(file[:key]),
+            nil,
+            nil,
+            file[:size],
+            file[:last_modified],
+            file[:key],
+            @metadata[file[:key]][:primary_identifier],
+            @metadata[file[:key]][:local_identifier],
+            @metadata[file[:key]][:creator],
+            @metadata[file[:key]][:title],
+            @metadata[file[:key]][:date]
                  ]
-               end
+        end
       end
       buffer.puts csv.string
     end
+    save_metadata
     buffer.puts %(#%eof)
     buffer.string
   end

@@ -10,7 +10,8 @@ require_relative 'inventory'
 
 ## Inventory configuration options for different modes of listing an inventory
 class InventoryConfig
-  INVENTORY_FILE = '/tmp/inventory/inventory-file.csv'
+  INVENTORY_LOCALFILE = '/tmp/inventory/inventory-file.csv'
+  METADATA_LOCALFILE = '/tmp/metadata/metadata-file.csv'
   INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
   MAXKEYS = 500
 
@@ -26,7 +27,8 @@ class InventoryConfig
     @source = ''
 
     @inventory = Inventory.new(self)
-    @inventory.load_csv
+    @inventory.load_inventory_csv
+    @inventory.load_metadata_csv
 
     case @mode
     when 's3api'
@@ -54,7 +56,7 @@ class InventoryConfig
       @source = @url
       if reload_needed
         @inventory.reset
-        url_reload(@url, INVENTORY_FILE)
+        url_reload(@url, INVENTORY_LOCALFILE)
       end
       @inventory.load_from_csv
     end
@@ -65,7 +67,7 @@ class InventoryConfig
     turl += "&max-keys=#{MAXKEYS}"
     turl += "&continuation-token=#{CGI.escape(token)}" unless token.empty?
     url_reload(turl, INVENTORY_XML)
-    @inventory.file_init
+    @inventory.inventory_file_init
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
     doc.xpath('//Contents').each do |content|
       key = content.xpath('Key').text
@@ -79,7 +81,7 @@ class InventoryConfig
     end
     return https_reload(url, token) unless token.empty?
 
-    @inventory.save
+    @inventory.save_inventory
   end
 
   # Add path param to perform partial reload
@@ -99,7 +101,7 @@ class InventoryConfig
     s3_client = Aws::S3::Client.new(
       region: ENV.fetch('AWS_REGION', 'us-west-2')
     )
-    @inventory.file_init
+    @inventory.inventory_file_init
     continuation_token = nil
     loop do
       response = s3_client.list_objects_v2(
@@ -115,7 +117,7 @@ class InventoryConfig
 
       continuation_token = response.next_continuation_token
     end
-    @inventory.save
+    @inventory.save_inventory
   end
 
   def reload_needed
