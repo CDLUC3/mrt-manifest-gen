@@ -105,7 +105,7 @@
         </div>
       </td>
     </tr>
-    <% iconfig.inventory.prefixes(iconfig.path).each do |prefix| %>
+    <% iconfig.inventory.prefixes(iconfig.path).each_with_index do |prefix, index| %>
     <tr>
       <td><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></td>
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(prefix)) %></td>
@@ -113,6 +113,7 @@
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(prefix)) %></td>
       <td/>
     </tr>
+    break if index >= 1000
     <% end %>
   </tbody>
 </table>
@@ -127,12 +128,13 @@
   </tr>
   </thead>
   <tbody>
-  <% iconfig.inventory.files(iconfig.path).each do |file| %>
+  <% iconfig.inventory.files(iconfig.path).each_with_index do |file, index| %>
   <tr>
     <td><%= file[:key] %></td>
     <td class="data"><%= Inventory.format_int(file[:size]) %></td>
     <td><%= file[:last_modified] %></td>
   </tr>
+  break if index >= 100
   <% end %>
   </tbody>
 </table>
