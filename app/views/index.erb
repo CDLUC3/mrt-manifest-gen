@@ -146,13 +146,14 @@
     <th>Count</th>
     <th>Bytes</th>
   </tr>
-  <% iconfig.inventory.extensions(iconfig.path).each_with_index do |ext, index| %>
+  <% iconfig.inventory.extensions(iconfig.path).each do |ext, info| %>
+  <% index = =%>
   <tr>
     <td><%= ext %></td>
     <td class="data"><%= Inventory.format_int(info[:count]) %></td>
     <td class="data"><%= Inventory.format_int(info[:bytes]) %></td>
   </tr>
-  <% break if index >= 100 %>
+  <% break if index += 1 >= 100 %>
   <% end %>
 </table>
 </body>
