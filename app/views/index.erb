@@ -147,7 +147,7 @@
     <th>Bytes</th>
   </tr>
   <% iconfig.inventory.extensions(iconfig.path).each do |ext, info| %>
-  <% index = =%>
+  <% index = 0 %>
   <tr>
     <td><%= ext %></td>
     <td class="data"><%= Inventory.format_int(info[:count]) %></td>
