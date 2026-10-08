@@ -125,7 +125,7 @@ class InventoryConfig
     return true if @inventory.count.zero?
     return true if @reload
 
-    @inventory.last_updated < (Time.now - 180) # Reload if older than 3 minutes
+    @inventory.last_updated < (Time.now - 30 * 60) # Reload if older than 30 minutes
   end
 
   def prefix_path(folder)
