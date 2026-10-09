@@ -113,12 +113,12 @@
       <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(prefix)) %></td>
       <td/>
     </tr>
-    <% break if index >= 100 %>
+    <% break if index >= iconfig.max_prefixes %>
     <% end %>
   </tbody>
 </table>
 
-<h3>Files</h3>
+<h3>Files (max <%= iconfig.max_files %> shown)</h3>
 <table>
   <thead>
   <tr>
@@ -134,12 +134,12 @@
     <td class="data"><%= Inventory.format_int(file[:size]) %></td>
     <td><%= file[:last_modified] %></td>
   </tr>
-  <% break if index >= 100 %>
+  <% break if index >= iconfig.max_files %>
   <% end %>
   </tbody>
 </table>
 
-<h3>Summary Stats</h3>
+<h3>Summary Stats (Top <%= iconfig.max_extensions %> Extensions)</h3>
 <table>
   <tr>
     <th>Extension</th>
@@ -147,14 +147,11 @@
     <th>Bytes</th>
   </tr>
   <% iconfig.inventory.extensions(iconfig.path).each do |ext, info| %>
-  <% index = 0 %>
   <tr>
     <td><%= ext %></td>
     <td class="data"><%= Inventory.format_int(info[:count]) %></td>
     <td class="data"><%= Inventory.format_int(info[:bytes]) %></td>
   </tr>
-  <% index += 1 %>
-  <% break if index >= 100 %>
   <% end %>
 </table>
 </body>

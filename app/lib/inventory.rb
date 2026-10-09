@@ -134,7 +134,7 @@ class Inventory
     @dirs[parent_path] ||= { count: 0, bytes: 0, files: [], extensions: {}, prefixes: [] }
     @dirs[parent_path][:count] += 1
     @dirs[parent_path][:bytes] += size
-    @dirs[parent_path][:extensions][ext] ||= { count: 0, bytes: 0 }
+    @dirs[parent_path][:extensions][ext] ||= { count: 0, bytes: 0, key: ext }
     @dirs[parent_path][:extensions][ext][:count] += 1
     @dirs[parent_path][:extensions][ext][:bytes] += size
     @dirs[parent_path][:files] << { key: current_path, size: size, last_modified: last_modified }
@@ -246,10 +246,30 @@ class Inventory
     depth_map
   end
 
-  def extensions(path)
-    return {} unless @dirs.key?(path)
+  def descendant_extensions(exts, path)
+    @dirs[path][:extensions].each do |ext, info|
+      exts[ext] ||= { count: 0, bytes: 0, key: ext }
+      exts[ext][:count] += info[:count]
+      exts[ext][:bytes] += info[:bytes]
+    end
+    prefixes(path).each do |prefix|
+      descendant_extensions(exts, prefix)
+    end
+    exts
+  end
 
-    @dirs[path][:extensions]
+  def extensions(path)
+    exts = {}
+    descendant_extensions(exts, path)
+    topexts = {}
+    exts.values
+      .sort_by { |ext| ext.fetch(:count, 0) }
+      .reverse
+      .each do |ext|
+        topexts[ext[:key]] = ext
+        break if topexts.length >= InventoryConfig::MAX_EXTENSIONS
+      end
+    topexts
   end
 
   def prefixes(path)

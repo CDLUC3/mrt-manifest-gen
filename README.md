@@ -12,6 +12,10 @@ Facilitate the generation of Merritt manifests using a cloud bucket or an invent
 - [Use Case 3](use-case-3.md): General purpose tool to generate manifests from an inventory listing
   - Eventually use this tool to build manifests from a DAMS system
 
+## Assumptions
+
+Individual ingest workspaces should be optimized for working with approx 100,000 files at a time.  If the number of files exceeds this number and introduces complexity, we should consider breaking up the project into multiple workspaces.
+
 ## What is the application?
 
 - The application will be built as a docker image that can be deployed to AWS lambda.

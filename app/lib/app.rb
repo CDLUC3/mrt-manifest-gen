@@ -13,7 +13,10 @@ class InventoryConfig
   INVENTORY_LOCALFILE = '/tmp/inventory/inventory-file.csv'
   METADATA_LOCALFILE = '/tmp/metadata/metadata-file.csv'
   INVENTORY_XML = '/tmp/inventory/inventory-file.xml'
-  MAXKEYS = 500
+  MAXKEYS = 1000
+  MAX_PREFIXES = 250
+  MAX_FILES = 25
+  MAX_EXTENSIONS = 5
 
   def initialize(path: '', reload: false)
     @path = path
@@ -125,7 +128,7 @@ class InventoryConfig
     return true if @inventory.count.zero?
     return true if @reload
 
-    @inventory.last_updated < (Time.now - 30 * 60) # Reload if older than 30 minutes
+    @inventory.last_updated < (Time.now - (30 * 60)) # Reload if older than 30 minutes
   end
 
   def prefix_path(folder)
@@ -157,6 +160,18 @@ class InventoryConfig
     return "#{@project}_manifest.checkm" if @path.empty?
 
     "#{@project}_manifest_#{@path.gsub('/', '_')}.checkm"
+  end
+
+  def max_prefixes
+    MAX_PREFIXES
+  end
+
+  def max_files
+    MAX_FILES
+  end
+
+  def max_extensions
+    MAX_EXTENSIONS
   end
 
   attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory, :path, :cache_bucket, :project,
