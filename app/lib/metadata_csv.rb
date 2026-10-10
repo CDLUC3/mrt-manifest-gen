@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require_relative 'cachefile'
 
+## Metadata file CSV. Metadata will be injected into checkm entries with matching keys.
 class MetadataCSV < CacheFile
   FOLDER = 'metadata'
   FILENAME = 'metadata-file.csv'
 
   def initialize(iconfig)
     @metadata = {}
-    bucket = ENV.fetch('CACHE_BUCKET', '')
+    ENV.fetch('CACHE_BUCKET', '')
     key = "#{iconfig.project}/#{FOLDER}/#{FILENAME}"
     localpath = "/tmp/#{FOLDER}/#{FILENAME}"
     super(iconfig, key, localpath)

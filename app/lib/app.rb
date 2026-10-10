@@ -90,7 +90,7 @@ class InventoryConfig
   end
 
   # Add path param to perform partial reload
-  def url_reload(url, localfile)
+  def url_reload(url, _localfile)
     uri = URI.parse(url)
     raise ArgumentError, "Unsupported URL scheme: #{uri.scheme}" unless %w[http https].include?(uri.scheme)
 

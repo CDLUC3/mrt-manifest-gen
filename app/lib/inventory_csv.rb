@@ -1,13 +1,16 @@
+# frozen_string_literal: true
+
 require_relative 'cachefile'
 
+## Inventory cache to speed up lambda navigation
 class InventoryCSV < CacheFile
   FOLDER = 'inventory'
   FILENAME = 'inventory-file.csv'
 
-  def initialize(iconfig)    
+  def initialize(iconfig)
     @dirs = {}
     @prefixes = []
-    bucket = ENV.fetch('CACHE_BUCKET', '')
+    ENV.fetch('CACHE_BUCKET', '')
     key = "#{iconfig.project}/#{FOLDER}/#{FILENAME}"
     localpath = "/tmp/#{FOLDER}/#{FILENAME}"
     super(iconfig, key, localpath)
@@ -210,6 +213,4 @@ class InventoryCSV < CacheFile
     @dirs[gparent_path][:prefixes] << ppath unless @dirs[gparent_path][:prefixes].include?(ppath)
     add_prefix(gparent_path)
   end
-
-  private
 end

@@ -1,8 +1,11 @@
+# frozen_string_literal: true
+
 require 'aws-sdk-s3'
 require 'csv'
 require 'uri'
 require 'stringio'
 
+## Base class for object that will be saved to the cache bucket
 class CacheFile
   def initialize(iconfig, key, localpath)
     @iconfig = iconfig
@@ -32,8 +35,7 @@ class CacheFile
     s3_client.put_object(bucket: iconfig.cache_bucket, key: @key, body: content)
   end
 
-  def load
-  end
+  def load; end
 
   def save
     write('')

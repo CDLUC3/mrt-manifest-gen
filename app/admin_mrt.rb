@@ -33,20 +33,19 @@ post '/manifest' do
   )
   if preview
     content_type 'text/plain'
-    if params[:depth].empty?
-      return iconfig.inventory_file.object_checkm_preview
-    else
-      return iconfig.inventory_file.checkm_preview(params[:depth])
-    end
+    return iconfig.inventory_file.object_checkm_preview if params[:depth].empty?
+
+    return iconfig.inventory_file.checkm_preview(params[:depth])
+
   end
 
   if params[:depth].empty?
     checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, params[:objectformat])
-    if params[:objectformat] == 'object_checkm'
-      manifest = checkm_file.object_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
-    else
-      manifest = checkm_file.single_file_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
-    end
+    manifest = if params[:objectformat] == 'object_checkm'
+                 checkm_file.object_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
+               else
+                 checkm_file.single_file_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
+               end
   else
     checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, :batch_checkm)
     manifest = checkm_file.batch_checkm(

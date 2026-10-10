@@ -1,6 +1,9 @@
+# frozen_string_literal: true
+
 require_relative 'cachefile'
 require_relative 'metadata_csv'
 
+## Checkm file class for saving object manifests to cache bucket
 class CheckmFile < CacheFile
   FOLDER = 'manifests'
 
