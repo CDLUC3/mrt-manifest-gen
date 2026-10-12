@@ -75,7 +75,7 @@ class InventoryConfig
     turl = url.dup
     turl += "&max-keys=#{MAXKEYS}"
     turl += "&continuation-token=#{CGI.escape(token)}" unless token.empty?
-    `mkdir -p File.dirname(INVENTORY_XML)`
+    `mkdir -p #{File.dirname(INVENTORY_XML)}`
     url_reload(turl, INVENTORY_XML)
     doc = Nokogiri::XML(File.read(INVENTORY_XML)).remove_namespaces!
     doc.xpath('//Contents').each do |content|
