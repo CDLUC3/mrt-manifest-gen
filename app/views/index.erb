@@ -28,7 +28,7 @@
   <dt>Mode</dt>
   <dd><%= iconfig.mode %></dd>
   <dt>Last Updated</dt>
-  <dd><%= Time.at(iconfig.inventory.last_updated).localtime.strftime("%Y-%m-%d %H:%M:%S") %></dd>
+  <dd><%= Time.at(iconfig.inventory_file.last_updated).localtime.strftime("%Y-%m-%d %H:%M:%S") %></dd>
   <dt>Reload Param</dt>
   <dd><%= iconfig.reload ? 'Yes' : 'No' %></dd>
   <dt>Reload Needed</dt>
@@ -52,26 +52,26 @@
     <% unless iconfig.path.empty? %>
     <tr>
       <td><a href="<%= iconfig.top_path %>"><%= iconfig.top_name %></a></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth('')) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count('')) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes('')) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_depth('')) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_count('')) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_bytes('')) %></td>
       <td/>
     </tr>
     <% end %>
     <% unless iconfig.parent_path.empty? || iconfig.parent_path == '/' %>
     <tr>
       <td><a href="/<%= iconfig.parent_path %>"><%= iconfig.parent_name %></a></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(iconfig.parent_path)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(iconfig.parent_path)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.parent_path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_depth(iconfig.parent_path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_count(iconfig.parent_path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_bytes(iconfig.parent_path)) %></td>
       <td/>
     </tr>
     <% end %>
     <tr>
       <td class="current"><span><%= iconfig.path %></span></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(iconfig.path)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(iconfig.path)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(iconfig.path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_depth(iconfig.path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_count(iconfig.path)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_bytes(iconfig.path)) %></td>
       <td>
         <div align="center">
         <form method="POST" action="/manifest">
@@ -84,10 +84,10 @@
           <label for="depth">Manifest Depth:</label>
           <select name="depth">
             <option value="">No Batch</option>
-            <% if iconfig.inventory.path_depth(iconfig.path) > 0 %>
+            <% if iconfig.inventory_file.path_depth(iconfig.path) > 0 %>
               <option value="1">Depth 1</option>
             <% end %>
-            <% for i in 2..iconfig.inventory.path_depth(iconfig.path) %>
+            <% for i in 2..iconfig.inventory_file.path_depth(iconfig.path) %>
               <option value="<%= i %>">Depth <%= i %></option>
               <option value="<%= -(i-1) %>">Depth <%= -(i-1) %></option>
             <% end %>
@@ -105,12 +105,12 @@
         </div>
       </td>
     </tr>
-    <% iconfig.inventory.prefixes(iconfig.path).each_with_index do |prefix, index| %>
+    <% iconfig.inventory_file.prefixes(iconfig.path).each_with_index do |prefix, index| %>
     <tr>
       <td><a href="<%= iconfig.prefix_path(prefix) %>"><%= prefix %></a></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_depth(prefix)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_count(prefix)) %></td>
-      <td class="data"><%= Inventory.format_int(iconfig.inventory.path_bytes(prefix)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_depth(prefix)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_count(prefix)) %></td>
+      <td class="data"><%= CacheFile.format_int(iconfig.inventory_file.path_bytes(prefix)) %></td>
       <td/>
     </tr>
     <% break if index >= iconfig.max_prefixes %>
@@ -128,10 +128,10 @@
   </tr>
   </thead>
   <tbody>
-  <% iconfig.inventory.files(iconfig.path).each_with_index do |file, index| %>
+  <% iconfig.inventory_file.files(iconfig.path).each_with_index do |file, index| %>
   <tr>
     <td><%= file[:key] %></td>
-    <td class="data"><%= Inventory.format_int(file[:size]) %></td>
+    <td class="data"><%= CacheFile.format_int(file[:size]) %></td>
     <td><%= file[:last_modified] %></td>
   </tr>
   <% break if index >= iconfig.max_files %>
@@ -146,11 +146,11 @@
     <th>Count</th>
     <th>Bytes</th>
   </tr>
-  <% iconfig.inventory.extensions(iconfig.path).each do |ext, info| %>
+  <% iconfig.inventory_file.extensions(iconfig.path).each do |ext, info| %>
   <tr>
     <td><%= ext %></td>
-    <td class="data"><%= Inventory.format_int(info[:count]) %></td>
-    <td class="data"><%= Inventory.format_int(info[:bytes]) %></td>
+    <td class="data"><%= CacheFile.format_int(info[:count]) %></td>
+    <td class="data"><%= CacheFile.format_int(info[:bytes]) %></td>
   </tr>
   <% end %>
 </table>
