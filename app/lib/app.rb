@@ -17,7 +17,7 @@ class InventoryConfig
   MAX_PREFIXES = 250
   MAX_FILES = 25
   MAX_EXTENSIONS = 5
-  RELOAD_MINUTES = 30
+  RELOAD_MINUTES = 4 * 60
 
   def initialize(path: '', reload: false)
     @path = path
@@ -173,6 +173,10 @@ class InventoryConfig
 
   def max_extensions
     MAX_EXTENSIONS
+  end
+
+  def reload_minutes
+    RELOAD_MINUTES
   end
 
   attr_reader :bucket, :mode, :prefix, :reload, :source, :file, :url, :inventory_file, :metadata_file, :path, :cache_bucket, :project,
