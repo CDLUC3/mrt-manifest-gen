@@ -44,7 +44,6 @@ class CacheFile
   def init
     `mkdir -p #{File.dirname(@localpath)}`
     File.write(@localpath, '')
-    @last_updated = Time.now
     ''
   end
 

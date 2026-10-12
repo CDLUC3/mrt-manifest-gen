@@ -41,6 +41,7 @@ class InventoryConfig
       @bucket = ENV.fetch('MANIFEST_BUCKET', '')
       @source = "s3://#{@bucket}/#{@prefix}"
       if reload_needed
+        @inventory_file.init
         @inventory_file.reset
         s3_reload(@bucket, @prefix)
       end
@@ -49,6 +50,7 @@ class InventoryConfig
       match = @source.match(%r{^https://([^.]+)\.})
       @bucket = match ? match[1] : ''
       if reload_needed
+        @inventory_file.init
         @inventory_file.reset
         https_reload("#{@source}/?list-type=2")
       end
@@ -61,6 +63,7 @@ class InventoryConfig
       @url = ENV.fetch('MANIFEST_URL', '')
       @source = @url
       if reload_needed
+        @inventory_file.init
         @inventory_file.reset
         url_reload(@url, INVENTORY_LOCALFILE)
       end
