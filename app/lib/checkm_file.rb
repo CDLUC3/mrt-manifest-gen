@@ -8,11 +8,11 @@ class CheckmFile < CacheFile
   FOLDER = 'manifests'
 
   def initialize(iconfig, checkmpath, manifest_type)
+    puts "Initializing CheckmFile with path: #{checkmpath}, manifest_type: #{manifest_type}"
     @metadata = {}
     @manifest_type = manifest_type
-    key = "#{iconfig.project}/#{FOLDER}/#{checkmpath}"
     localpath = "/tmp/#{FOLDER}/#{checkmpath}"
-    super(iconfig, key, localpath)
+    super(iconfig, checkmpath, localpath)
   end
 
   def load
