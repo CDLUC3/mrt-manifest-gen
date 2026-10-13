@@ -94,14 +94,14 @@ class InventoryConfig
   end
 
   # Add path param to perform partial reload
-  def url_reload(url, _localfile)
+  def url_reload(url, localfile)
     uri = URI.parse(url)
     raise ArgumentError, "Unsupported URL scheme: #{uri.scheme}" unless %w[http https].include?(uri.scheme)
 
     response = Net::HTTP.get_response(uri)
     raise "Failed to fetch #{uri}: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
-    File.write(@inventory_file.localpath, response.body)
+    File.write(localfile, response.body)
   end
 
   # Add path param to perform partial reload
