@@ -74,7 +74,7 @@ class CheckmFile < CacheFile
       files.each do |file|
         iconfig.metadata_file.metadata[file[:key]] ||= MetadataCSV.metadata_record
         csv << [
-          file_url(file[:key]),
+          "#{file_url(file[:key])} ",
           nil,
           nil,
           file[:size],

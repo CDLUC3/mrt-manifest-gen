@@ -59,6 +59,7 @@ class CacheFile
   end
 
   def pathencode(path)
+    puts "Encoding path: #{path} #{path.split('/').map { |s| CGI.escape(s) }.join('/')}"
     path.split('/').map { |s| CGI.escape(s) }.join('/')
   end
 
