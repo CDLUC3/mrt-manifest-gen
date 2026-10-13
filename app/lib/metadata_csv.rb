@@ -38,6 +38,7 @@ class MetadataCSV < CacheFile
   end
 
   def save
+    init
     CSV.open(@localpath, 'a', col_sep: ',', row_sep: "\n") do |csv|
       @metadata.each do |key, meta_info|
         csv << [
