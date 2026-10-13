@@ -114,8 +114,8 @@ class CheckmFile < CacheFile
           iconfig.metadata_file.metadata[mkey][:date]
         ]
         ocheckm = CheckmFile.new(iconfig, manifest_key(mapkey), objectformat)
-        ocheckm.write(object_checkm(files)) if objectformat == 'object_checkm'
-        ocheckm.write(single_file_checkm(files)) if objectformat == 'single_file_checkm'
+        ocheckm.write(object_checkm(files)) if objectformat == 'mrt-ingest-manifest'
+        ocheckm.write(single_file_checkm(files)) if objectformat == 'mrt-single-file-batch-manifest'
       end
       batch_buffer.puts csv.string
     end
