@@ -2,6 +2,7 @@
 
 require_relative 'cachefile'
 require_relative 'metadata_csv'
+require 'time'
 
 ## Checkm file class for saving object manifests to cache bucket
 class CheckmFile < CacheFile
@@ -54,7 +55,7 @@ class CheckmFile < CacheFile
           nil,
           nil,
           file[:size],
-          file[:last_modified],
+          format_last_modified(file[:last_modified]),
           file[:key],
           nil
        ]
@@ -77,7 +78,7 @@ class CheckmFile < CacheFile
           nil,
           nil,
           file[:size],
-          file[:last_modified],
+          format_last_modified(file[:last_modified]),
           file[:key],
           iconfig.metadata_file.metadata[file[:key]][:primary_identifier],
           iconfig.metadata_file.metadata[file[:key]][:local_identifier],
@@ -126,4 +127,13 @@ class CheckmFile < CacheFile
   end
 
   attr_reader :manifest_type
+
+  private
+
+  def format_last_modified(value)
+    return if value.nil? || value.to_s.empty?
+
+    time = value.is_a?(Time) ? value : Time.parse(value.to_s)
+    time.strftime('%Y-%m-%d')
+  end
 end
