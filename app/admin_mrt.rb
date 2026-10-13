@@ -41,7 +41,7 @@ post '/manifest' do
 
   if params[:depth].empty?
     checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, params[:objectformat])
-    manifest = if params[:objectformat] == 'object_checkm'
+    manifest = if params[:objectformat] == 'mrt-ingest-manifest'
                  checkm_file.object_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
                else
                  checkm_file.single_file_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
