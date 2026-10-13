@@ -32,7 +32,7 @@
   <dt>Reload Param</dt>
   <dd><%= iconfig.reload ? 'Yes' : 'No' %></dd>
   <dt>Reload Needed</dt>
-  <dd><%= iconfig.reload_needed ? 'Yes' : 'No' %> (Reload after iconfig.reload_minutes minutes)</dd>
+  <dd><%= iconfig.reload_needed ? 'Yes' : 'No' %> (Reload after <%= iconfig.reload_minutes %> minutes)</dd>
   <dt>Cache Bucket</dt>
   <dd><%= iconfig.cache_bucket %></dd>
 </dl>
