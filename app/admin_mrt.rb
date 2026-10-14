@@ -39,9 +39,9 @@ post '/manifest' do
 
   end
 
-  if params[:depth].empty?
-    checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, params[:objectformat])
-    manifest = if params[:objectformat] == 'mrt-ingest-manifest'
+  if params[:depth] =~ /^(mrt-ingest-manifest|mrt-single-file-batch-manifest)$/
+    checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, params[:depth])
+    manifest = if params[:depth] == 'mrt-ingest-manifest'
                  checkm_file.object_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
                else
                  checkm_file.single_file_checkm(iconfig.inventory_file.descendant_files(iconfig.path))
@@ -49,8 +49,7 @@ post '/manifest' do
   else
     checkm_file = CheckmFile.new(iconfig, iconfig.batch_manifest_path, :batch_checkm)
     manifest = checkm_file.batch_checkm(
-      iconfig.inventory_file.descendant_files_by_depth(iconfig.path, params[:depth].to_i),
-      params[:objectformat]
+      iconfig.inventory_file.descendant_files_by_depth(iconfig.path, params[:depth].to_i)
     )
   end
 

@@ -83,7 +83,8 @@
           <div>
           <label for="depth">Manifest Depth:</label>
           <select name="depth">
-            <option value="">No Batch</option>
+            <option value="mrt-ingest-manifest">Ingest Manifest</option>
+            <option value="mrt-single-file-batch-manifest">Single File Batch Manifest</option>
             <% if iconfig.inventory_file.path_depth(iconfig.path) > 0 %>
               <option value="1">Depth 1</option>
             <% end %>
@@ -92,12 +93,6 @@
               <option value="<%= -(i-1) %>">Depth <%= -(i-1) %></option>
             <% end %>
           </select>
-          <div>
-          <label for="objectformat">Object Manifest Type:</label>
-            <input type="radio" name="objectformat" checked value="mrt-ingest-manifest">One Object</input>
-            <input type="radio" name="objectformat" value="mrt-single-file-batch-manifest">One Object Per File</input>  
-          </div>
-          </div>
           <div>
           <input type="submit" value="Make Manifest">
           </div>

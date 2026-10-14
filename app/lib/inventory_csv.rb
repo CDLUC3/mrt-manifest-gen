@@ -167,7 +167,7 @@ class InventoryCSV < CacheFile
   end
 
   def checkm_preview(depth = '')
-    return object_checkm_preview if depth.empty?
+    return object_checkm_preview if depth =~ /^(mrt-ingest-manifest|mrt-single-file-batch-manifest)$/
 
     buffer = StringIO.new
     buffer.puts 'Manifest Checkm'

@@ -94,7 +94,7 @@ class CheckmFile < CacheFile
     buffer.string
   end
 
-  def batch_checkm(filemap, objectformat)
+  def batch_checkm(filemap)
     batch_buffer = StringIO.new
     batch_buffer.puts CheckmFile.batch_checkm_header
     CSV.generate(col_sep: '|', row_sep: "\n", force_quotes: false) do |csv|
@@ -114,9 +114,8 @@ class CheckmFile < CacheFile
           iconfig.metadata_file.metadata[mkey][:title],
           iconfig.metadata_file.metadata[mkey][:date]
         ]
-        ocheckm = CheckmFile.new(iconfig, manifest_key(mapkey), objectformat)
-        ocheckm.write(object_checkm(files)) if objectformat == 'mrt-ingest-manifest'
-        ocheckm.write(single_file_checkm(files)) if objectformat == 'mrt-single-file-batch-manifest'
+        ocheckm = CheckmFile.new(iconfig, manifest_key(mapkey), 'mrt-ingest-manifest')
+        ocheckm.write(object_checkm(files))
       end
       batch_buffer.puts csv.string
     end
