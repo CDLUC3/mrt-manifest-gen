@@ -8,7 +8,7 @@ Facilitate the generation of Merritt manifests using a cloud bucket or an invent
 
 ## Use Cases
 - [Use Case 1](use-case-1.md): Work with UC3 "Ingest Workspace S3 Buckets" (UC3 owns the bucket and processes content on behalf of a Merritt depositor)
-- [Use Case 2](use-case-2.md): Work directly with Depositor buckets using S3 https calls (GET/LIST) to a depositor bucket.
+- [Use Case 2](use-case-2.md): Work directly with Depositor buckets using S3 https calls (GET/LIST) to a depositor bucket (us-west-2 only).
 - [Use Case 3](use-case-3.md): General purpose tool to generate manifests from an inventory listing
   - Eventually use this tool to build manifests from a DAMS system
 

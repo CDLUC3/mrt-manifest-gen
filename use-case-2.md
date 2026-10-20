@@ -2,6 +2,9 @@
 
 - [Merritt Manifest Generator](README.md)
 
+> [!NOTE]
+> This option will only work with buckets in our region (us-west-2)
+
 ## Diagram
 
 ```mermaid
