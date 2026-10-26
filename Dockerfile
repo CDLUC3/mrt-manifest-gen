@@ -7,8 +7,11 @@
 FROM public.ecr.aws/lambda/ruby:3.4
 ARG BUILD_TAG
 
-RUN dnf -y update && dnf -y upgrade
-RUN dnf -y install gcc make git
+RUN dnf clean all && \
+    dnf -y update && \
+    dnf -y upgrade && \
+    dnf -y install gcc make git && \
+    dnf clean all
 
 ENV RACK_CONFIG=app/config_mrt.ru
 ENV TZ=America/Los_Angeles
