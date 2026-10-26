@@ -39,7 +39,7 @@ phases:
         --no-cli-pager
 
       aws lambda update-function-code \
-        --function-name mrt-SinatraLambda-ucsfctp \
+        --function-name mrt-SinatraLambda-ucsctest \
         --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
         --no-cli-pager
 
