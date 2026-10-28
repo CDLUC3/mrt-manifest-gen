@@ -62,3 +62,8 @@ phases:
         --function-name mrt-SinatraLambda-testdata \
         --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
         --no-cli-pager
+
+      aws lambda update-function-code \
+        --function-name mrt-SinatraLambda-useast \
+        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
+        --no-cli-pager
