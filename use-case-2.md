@@ -3,7 +3,8 @@
 - [Merritt Manifest Generator](README.md)
 
 > [!NOTE]
-> This option will only work with buckets in our region (us-west-2)
+> When working with buckets outside of our region (us-west-2), a different AWS bucket policy is needed.
+> See [Sceptre Configuration (internal)](https://github.com/CDLUC3/mrt-sceptre/blob/main/ingest-wkspace/README.md) for details.
 
 ## Diagram
 
