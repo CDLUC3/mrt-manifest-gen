@@ -93,6 +93,8 @@ class InventoryCSV < CacheFile
   end
 
   def descendant_extensions(exts, path)
+    return exts unless @dirs.key?(path)
+    return exts unless @dirs[path].key?(:extensions)
     @dirs[path][:extensions].each do |ext, info|
       exts[ext] ||= { count: 0, bytes: 0, key: ext }
       exts[ext][:count] += info[:count]
