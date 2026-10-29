@@ -27,7 +27,7 @@ class InventoryConfig
     @project = ENV.fetch('PROJECT_NAME', 'not-applicable')
     @mode = ENV.fetch('MANIFEST_MODE', 's3api')
     @prefix = ENV.fetch('MANIFEST_PREFIX', '')
-    @region = ENV.fetch('AWS_REGION', 'us-west-2')
+    @region = ENV.fetch('BUCKET_REGION', 'us-west-2')
     @source = ''
 
     @inventory_file = InventoryCSV.new(self)
