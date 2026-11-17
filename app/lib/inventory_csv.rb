@@ -166,7 +166,7 @@ class InventoryCSV < CacheFile
     descendant_files(iconfig.path).each do |file|
       buffer.puts "  #{file_url(file[:key])}"
     end
-    buffer.string
+    buffer.length > 500_000 ? buffer.length.to_s : buffer.string
   end
 
   def checkm_preview(depth = '')
@@ -184,7 +184,7 @@ class InventoryCSV < CacheFile
         buffer.puts "  #{file_url(file[:key])}"
       end
     end
-    buffer.string
+    buffer.length > 500_000 ? buffer.length.to_s : buffer.string
   end
 
   def add(key, size, last_modified)
