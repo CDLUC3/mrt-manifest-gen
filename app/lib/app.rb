@@ -52,7 +52,7 @@ class InventoryConfig
       if reload_needed
         @inventory_file.init
         @inventory_file.reset
-        https_reload("#{@source}/?list-type=2")
+        https_reload("#{@source}/?list-type=2&prefix=#{CGI.escape(@prefix)}")
       end
 
     # Not yet implemented
