@@ -5,7 +5,7 @@ require_relative 'cachefile'
 ## Inventory cache to speed up lambda navigation
 class PreviewFile < CacheFile
   FOLDER = 'preview'
-  FILENAME = 'preview-file.csv'
+  FILENAME = 'preview-file.txt'
 
   def initialize(iconfig, data)
     key = "#{iconfig.project}/#{FOLDER}/#{FILENAME}"
