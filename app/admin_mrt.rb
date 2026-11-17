@@ -42,11 +42,13 @@ post '/manifest' do
     if buffer.length > 500_000
       preview = PreviewFile.new(iconfig, buffer)
       preview.save
+      content_type 'text/plain'
       redirect preview.presign_url
+      return
     end
 
     content_type 'text/plain'
-    return preview
+    return buffer
   end
 
   if params[:depth] =~ /^(mrt-ingest-manifest|mrt-single-file-batch-manifest)$/
