@@ -9,6 +9,7 @@ require 'nokogiri'
 require_relative 'inventory_csv'
 require_relative 'metadata_csv'
 require_relative 'checkm_file'
+require_relative 'preview_file'
 
 ## Inventory configuration options for different modes of listing an inventory
 class InventoryConfig
