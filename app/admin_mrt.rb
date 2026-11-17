@@ -45,6 +45,7 @@ post '/manifest' do
       redirect preview.presign_url
     end
 
+    content_type 'text/plain'
     return preview
   end
 
