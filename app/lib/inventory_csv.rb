@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require_relative 'cachefile'
-require_relative 'preview_file'
 
 ## Inventory cache to speed up lambda navigation
 class InventoryCSV < CacheFile
@@ -167,12 +166,7 @@ class InventoryCSV < CacheFile
     descendant_files(iconfig.path).each do |file|
       buffer.puts "  #{file_url(file[:key])}"
     end
-    if buffer.length > 500_000
-      preview = PreviewFile.new(iconfig, buffer.string)
-      preview.save
-      redirect preview.presign_url
-    end
-    buffer.string
+     buffer.string
   end
 
   def checkm_preview(depth = '')
@@ -189,11 +183,6 @@ class InventoryCSV < CacheFile
       files.each do |file|
         buffer.puts "  #{file_url(file[:key])}"
       end
-    end
-    if buffer.length > 500_000
-      preview = PreviewFile.new(iconfig, buffer.string)
-      preview.save
-      redirect preview.presign_url
     end
     buffer.string
   end

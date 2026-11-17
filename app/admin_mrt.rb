@@ -33,9 +33,19 @@ post '/manifest' do
   )
   if preview
     content_type 'text/plain'
-    return iconfig.inventory_file.object_checkm_preview if params[:depth].empty?
+    buffer = ""
+    if params[:depth].empty?
+      buffer = iconfig.inventory_file.object_checkm_preview if params[:depth].empty?
+    else
+      buffer = iconfig.inventory_file.checkm_preview(params[:depth])
+    end
+    if buffer.length > 500_000
+      preview = PreviewFile.new(iconfig, buffer)
+      preview.save
+      redirect preview.presign_url
+    end
 
-    return iconfig.inventory_file.checkm_preview(params[:depth])
+    return preview
   end
 
   if params[:depth] =~ /^(mrt-ingest-manifest|mrt-single-file-batch-manifest)$/
