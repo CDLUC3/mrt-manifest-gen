@@ -79,6 +79,7 @@ class CacheFile
       :get_object, bucket: iconfig.cache_bucket, 
       key: @key, 
       expires_in: 3600,
+      response_content_type: 'text/plain',
       response_content_disposition: 'inline'
     )
   end
