@@ -75,7 +75,12 @@ class CacheFile
   end
 
   def presign_url
-    url, = s3_presigner.presigned_request(:get_object, bucket: iconfig.cache_bucket, key: @key, expires_in: 3600)
+    url, = s3_presigner.presigned_request(
+      :get_object, bucket: iconfig.cache_bucket, 
+      key: @key, 
+      expires_in: 3600,
+      response_content_disposition: 'inline'
+    )
     url
   end
 
