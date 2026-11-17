@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'cachefile'
+require_relative 'preview_file'
 
 ## Inventory cache to speed up lambda navigation
 class InventoryCSV < CacheFile
