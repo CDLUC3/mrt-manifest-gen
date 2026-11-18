@@ -18,7 +18,7 @@ class MetadataCSV < CacheFile
   def init
     super
     CSV.open(@localpath, 'w', col_sep: ',', row_sep: "\n") do |csv|
-      csv << %w[key primary_identifier local_identifier creator title date]
+      csv << %w[§key primary_identifier local_identifier creator title date]
     end
     File.read(@localpath)
   end
