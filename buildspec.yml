@@ -49,11 +49,6 @@ phases:
         --no-cli-pager
 
       aws lambda update-function-code \
-        --function-name mrt-SinatraLambda-ucilib \
-        --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
-        --no-cli-pager
-
-      aws lambda update-function-code \
         --function-name mrt-SinatraLambda-ucilib-rem \
         --image-uri ${ECR_REGISTRY}/${REPONAME}:${BRANCHTAG} \
         --no-cli-pager
