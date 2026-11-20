@@ -194,7 +194,7 @@ class InventoryCSV < CacheFile
     buffer.puts ''
 
     descendant_files_by_depth(iconfig.path, depth.to_i).each do |mapkey, files|
-      buffer.puts "#{manifest_url(mapkey)}: #{metadata_record(mapkey)}"
+      buffer.puts "#{manifest_url(mapkey)}: #{metadata_record(mapkey)}: #{mapkey}"
       files.each do |file|
         buffer.puts "  #{file_url(file[:key])}"
       end
