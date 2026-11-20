@@ -157,20 +157,19 @@ class InventoryCSV < CacheFile
     max_depth
   end
 
+  def metadata_field(path, field, label = '')
+    val = iconfig.metadata_file.metadata[path].fetch(field, '')
+    val.nil? ? '' : "#{label}: #{val}; "
+  end
+
   def metadata_record(path)
     iconfig.metadata_file.metadata[path] ||= MetadataCSV.metadata_record
-    rval = ''
-    val = iconfig.metadata_file.metadata[path].fetch(:primary_identifier, '')
-    rval += "Primary: #{val}; " unless val.empty?
-    val = iconfig.metadata_file.metadata[path].fetch(:local_identifier, '')
-    rval += "Local: #{val}; " unless val.empty?
-    val = iconfig.metadata_file.metadata[path].fetch(:title, '')
-    rval += "Title: #{val}; " unless val.empty?
-    val = iconfig.metadata_file.metadata[path].fetch(:creator, '')
-    rval += "Creator: #{val}; " unless val.empty?
-    val = iconfig.metadata_file.metadata[path].fetch(:date, '')
-    rval += "Date: #{val}" unless val.empty?
-    rval
+    rval = metadata_field(path, :primary_identifier, 'Primary')
+    rval += metadata_field(path, :local_identifier, 'Local')
+    rval += metadata_field(path, :title, 'Title')
+    rval += metadata_field(path, :creator, 'Creator')
+    rval += metadata_field(path, :date, 'Date')
+    rval.chomp(' ')
   end
 
   def object_checkm_preview
