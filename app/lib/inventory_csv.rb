@@ -166,7 +166,7 @@ class InventoryCSV < CacheFile
     descendant_files(iconfig.path).each do |file|
       buffer.puts "  #{file_url(file[:key])}"
     end
-     buffer.string
+    buffer.string
   end
 
   def checkm_preview(depth = '')

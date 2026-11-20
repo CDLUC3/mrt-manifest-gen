@@ -17,5 +17,4 @@ class PreviewFile < CacheFile
   def save
     write(@data)
   end
-
 end

@@ -54,7 +54,7 @@ class InventoryConfig
         @inventory_file.init
         @inventory_file.reset
         prefixes = @prefix.split(',')
-        prefixes << "" if prefixes.empty?
+        prefixes << '' if prefixes.empty?
         prefixes.each do |prefix|
           https_reload("#{@source}/?list-type=2&prefix=#{CGI.escape(prefix)}")
         end

@@ -33,7 +33,7 @@ post '/manifest' do
   )
   if preview
     content_type 'text/plain'
-    buffer = ""
+    buffer = ''
     if params[:depth].empty?
       buffer = iconfig.inventory_file.object_checkm_preview if params[:depth].empty?
     else

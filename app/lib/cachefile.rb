@@ -76,8 +76,8 @@ class CacheFile
 
   def presign_url
     s3_presigner.presigned_url(
-      :get_object, bucket: iconfig.cache_bucket, 
-      key: @key, 
+      :get_object, bucket: iconfig.cache_bucket,
+      key: @key,
       expires_in: 3600,
       response_content_type: 'text/plain',
       response_content_disposition: 'inline'
@@ -91,7 +91,6 @@ class CacheFile
   def s3_client
     @s3_client ||= Aws::S3::Client.new(region: ENV.fetch('AWS_REGION', 'us-west-2'))
   end
-
 
   def s3_presigner
     @s3_presigner ||= Aws::S3::Presigner.new(client: s3_client)
