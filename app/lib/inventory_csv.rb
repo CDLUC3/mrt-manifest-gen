@@ -158,17 +158,17 @@ class InventoryCSV < CacheFile
   end
 
   def metadata_record(path)
-    @iconfig.metadata_file.metadata[path] ||= MetadataCSV.metadata_record
-    rval = ""
-    val = @iconfig.metadata_file.metadata[path].fetch(:primary_identifier, '')
+    iconfig.metadata_file.metadata[path] ||= MetadataCSV.metadata_record
+    rval = ''
+    val = iconfig.metadata_file.metadata[path].fetch(:primary_identifier, '')
     rval += "Primary: #{val}; " unless val.empty?
-    val = @iconfig.metadata_file.metadata[path].fetch(:local_identifier, '')
+    val = iconfig.metadata_file.metadata[path].fetch(:local_identifier, '')
     rval += "Local: #{val}; " unless val.empty?
-    val = @iconfig.metadata_file.metadata[path].fetch(:title, '')
+    val = iconfig.metadata_file.metadata[path].fetch(:title, '')
     rval += "Title: #{val}; " unless val.empty?
-    val = @iconfig.metadata_file.metadata[path].fetch(:creator, '')
+    val = iconfig.metadata_file.metadata[path].fetch(:creator, '')
     rval += "Creator: #{val}; " unless val.empty?
-    val = @iconfig.metadata_file.metadata[path].fetch(:date, '')
+    val = iconfig.metadata_file.metadata[path].fetch(:date, '')
     rval += "Date: #{val}" unless val.empty?
     rval
   end
