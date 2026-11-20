@@ -36,7 +36,6 @@ class InventoryConfig
 
     @inventory_file.load
     @metadata_file.load
-    puts "Metadata file loaded: #{@metadata_file.key} #{@metadata_file.metadata.count} records"
 
     case @mode
     when 's3api'

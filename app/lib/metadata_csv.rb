@@ -27,7 +27,6 @@ class MetadataCSV < CacheFile
     @metadata = {}
     CSV.parse(read, headers: true, col_sep: ',', row_sep: "\n") do |row|
       rkey = row['§key']
-      puts "rkey: #{rkey}"
       @metadata[rkey] = {
         primary_identifier: row['primary_identifier'],
         local_identifier: row['local_identifier'],
