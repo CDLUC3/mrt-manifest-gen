@@ -157,10 +157,26 @@ class InventoryCSV < CacheFile
     max_depth
   end
 
+  def metadata_record(path)
+    @metadata_file.metadata[path] ||= MetadataCSV.metadata_record
+    rval = ""
+    val = @metadata_file.metadata[path].fetch(:primary_identifier, '')
+    rval += "Primary: #{val}; " unless val.empty?
+    val = @metadata_file.metadata[path].fetch(:local_identifier, '')
+    rval += "Local: #{val}; " unless val.empty?
+    val = @metadata_file.metadata[path].fetch(:title, '')
+    rval += "Title: #{val}; " unless val.empty?
+    val = @metadata_file.metadata[path].fetch(:creator, '')
+    rval += "Creator: #{val}; " unless val.empty?
+    val = @metadata_file.metadata[path].fetch(:date, '')
+    rval += "Date: #{val}" unless val.empty?
+    rval
+  end
+
   def object_checkm_preview
     buffer = StringIO.new
     buffer.puts 'Object Checkm'
-    buffer.puts "Path: #{iconfig.path}"
+    buffer.puts "Path: #{iconfig.path}: #{metadata_record(iconfig.path)}"
     buffer.puts ''
 
     descendant_files(iconfig.path).each do |file|
@@ -179,7 +195,7 @@ class InventoryCSV < CacheFile
     buffer.puts ''
 
     descendant_files_by_depth(iconfig.path, depth.to_i).each do |mapkey, files|
-      buffer.puts manifest_url(mapkey)
+      buffer.puts "#{manifest_url(mapkey)}: #{metadata_record(mapkey)}"
       files.each do |file|
         buffer.puts "  #{file_url(file[:key])}"
       end
