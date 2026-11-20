@@ -33,9 +33,11 @@ class InventoryConfig
 
     @inventory_file = InventoryCSV.new(self)
     @metadata_file = MetadataCSV.new(self)
+    puts "Metadata file: #{@metadata_file.localpath} #{@metadata_file.metadata.count} records"
 
     @inventory_file.load
     @metadata_file.load
+    puts "Metadata file loaded: #{@metadata_file.localpath} #{@metadata_file.metadata.count} records"
 
     case @mode
     when 's3api'
